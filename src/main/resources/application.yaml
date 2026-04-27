@@ -1,15 +1,46 @@
 server:
-  port: 9050
+  port: 9020
 
 spring:
   application:
     name: api-gateway
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
+      routes:
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/orders/**
+          filters:
+            - StripPrefix=1
+
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/users/**
+          filters:
+            - StripPrefix=1
+
+        - id: product-service
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/products/**
+          filters:
+            - StripPrefix=1
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: order-service
+        url: /orders/v3/api-docs
+      - name: user-service
+        url: /users/v3/api-docs
+      - name: product-service
+        url: /products/v3/api-docs
+
+jwt:
+  secret: qwertyuiopasdfghjklzxcvbnmQWERTYUASDFGHJZXCVBNwerty
+  expiry: 900000
 
 eureka:
   client:
