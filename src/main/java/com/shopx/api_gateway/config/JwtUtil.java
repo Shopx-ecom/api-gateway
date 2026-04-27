@@ -87,16 +87,16 @@ public class JwtUtil {
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                    .setSigningKey(secret)
+                    .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token);
 
             return true;
 
         } catch (ExpiredJwtException e) {
-            throw new AuthException("Token expired");
+            throw new AuthException("Token expired - "+e.getMessage());
         } catch (JwtException e) {
-            throw new AuthException("Invalid token");
+            throw new AuthException("Invalid token - "+e.getMessage());
         }
     }
 

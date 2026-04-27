@@ -45,7 +45,6 @@ public class SecurityConfig {
                         .pathMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .pathMatchers("/api/v1/sellers/**").hasRole("SELLER")
                         .pathMatchers("/api/v1/customers/**").hasRole("CUSTOMER")
-
                         .anyExchange().authenticated()
                 )
 

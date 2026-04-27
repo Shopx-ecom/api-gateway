@@ -45,6 +45,9 @@ public class JwtAuthFilter implements WebFilter {
         String token = authHeader.substring(7);
 
         try {
+
+            log.info("JWT token - {}",token);
+
             if (!jwtUtil.validateToken(token)) {
                 return Mono.error(new RuntimeException("Invalid JWT token"));
             }
