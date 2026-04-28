@@ -39,12 +39,10 @@ public class SecurityConfig {
                                 "/webjars/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/users/v3/api-docs",
+                                "/products/v3/api-docs",
+                                "/orders/v3/api-docs",
                                 "/api/v1/auth/**"
                         ).permitAll()
-
-                        .pathMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .pathMatchers("/api/v1/sellers/**").hasRole("SELLER")
-                        .pathMatchers("/api/v1/customers/**").hasRole("CUSTOMER")
                         .anyExchange().authenticated()
                 )
 

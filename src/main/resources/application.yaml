@@ -33,6 +33,12 @@ spring:
           filters:
             - StripPrefix=1
 
+        - id: product-service
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/api/v1/products/**, /api/v1/inventory/**
+
+
 springdoc:
   swagger-ui:
     urls:
