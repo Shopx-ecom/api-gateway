@@ -64,7 +64,7 @@ public class JwtAuthFilter implements WebFilter {
                         authorities
                 );
 
-                exchange.getAttributes().put(Constants.SESSION_USER_ID, userId);
+                //exchange.getAttributes().put(Constants.SESSION_USER_ID, userId);
 
                 return chain.filter(exchange)
                         .contextWrite(

@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopX — Product Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+          --bg: #0d0d0f;
+          --surface: #16161a;
+          --border: #2a2a30;
+          --accent: #e8ff47;
+          --accent2: #47ffe8;
+          --text: #e8e8ec;
+          --muted: #6b6b7a;
+          --danger: #ff4757;
+          --success: #2ed573;
+          --mono: 'JetBrains Mono', monospace;
+          --sans: 'Syne', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: var(--sans);
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* TOP BAR */
+        header {
+          border-bottom: 1px solid var(--border);
+          padding: 0 2rem;
+          display: flex;
+          align-items: center;
+          gap: 2rem;
+          height: 56px;
+          position: sticky;
+          top: 0;
+          background: var(--bg);
+          z-index: 100;
+        }
+        .logo {
+          font-size: 1.1rem;
+          font-weight: 800;
+          letter-spacing: -0.03em;
+          color: var(--accent);
+          white-space: nowrap;
+        }
+        .logo span { color: var(--text); }
+
+        .jwt-bar {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          margin-left: auto;
+        }
+        .jwt-status {
+          width: 8px; height: 8px;
+          border-radius: 50%;
+          background: var(--muted);
+          flex-shrink: 0;
+          transition: background 0.3s;
+        }
+        .jwt-status.ok { background: var(--success); }
+        .role-toggle {
+          display: flex;
+          align-items: center;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 5px;
+          overflow: hidden;
+          font-family: var(--mono);
+          font-size: 0.72rem;
+        }
+        .role-toggle button {
+          background: transparent;
+          border: none;
+          color: var(--muted);
+          padding: 0.38rem 0.9rem;
+          cursor: pointer;
+          font-family: var(--mono);
+          font-size: 0.72rem;
+          transition: background 0.15s, color 0.15s;
+          white-space: nowrap;
+        }
+        .role-toggle button.active-role {
+          background: #00c8b4;
+          color: #0d0d0f;
+          font-weight: 600;
+        }
+        .role-toggle .divider-v {
+          width: 1px;
+          height: 28px;
+          background: var(--border);
+        }
+        .jwt-role-label {
+          font-family: var(--mono);
+          font-size: 0.68rem;
+          color: var(--muted);
+          white-space: nowrap;
+        }
+
+        /* LAYOUT */
+        .layout { display: flex; flex: 1; overflow: hidden; }
+
+        nav {
+          width: 180px;
+          border-right: 1px solid var(--border);
+          padding: 1.5rem 0;
+          flex-shrink: 0;
+        }
+        nav a {
+          display: block;
+          padding: 0.55rem 1.5rem;
+          font-size: 0.82rem;
+          color: var(--muted);
+          text-decoration: none;
+          cursor: pointer;
+          transition: color 0.15s, background 0.15s;
+          border-left: 2px solid transparent;
+          letter-spacing: 0.03em;
+          font-weight: 600;
+        }
+        nav a:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+        nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(232,255,71,0.04); }
+        .nav-section {
+          font-family: var(--mono);
+          font-size: 0.6rem;
+          color: var(--muted);
+          padding: 1.2rem 1.5rem 0.4rem;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        /* MAIN */
+        main {
+          flex: 1;
+          overflow-y: auto;
+          padding: 2rem;
+        }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        h2 {
+          font-size: 1.2rem;
+          font-weight: 800;
+          margin-bottom: 1.5rem;
+          letter-spacing: -0.02em;
+        }
+
+        /* CARD */
+        .card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 1.25rem;
+          margin-bottom: 1.25rem;
+        }
+        .card-title {
+          font-family: var(--mono);
+          font-size: 0.7rem;
+          color: var(--muted);
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          margin-bottom: 1rem;
+        }
+
+        /* FORM */
+        .form-row {
+          display: flex;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+          margin-bottom: 0.75rem;
+        }
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.3rem;
+          flex: 1;
+          min-width: 140px;
+        }
+        .form-group label {
+          font-family: var(--mono);
+          font-size: 0.68rem;
+          color: var(--muted);
+        }
+        .form-group input, .form-group select {
+          background: var(--bg);
+          border: 1px solid var(--border);
+          color: var(--text);
+          font-family: var(--mono);
+          font-size: 0.8rem;
+          padding: 0.5rem 0.7rem;
+          border-radius: 4px;
+          outline: none;
+          transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+        .form-group input::placeholder { color: var(--muted); }
+
+        /* BUTTONS */
+        .btn {
+          font-family: var(--sans);
+          font-weight: 600;
+          font-size: 0.78rem;
+          padding: 0.5rem 1.1rem;
+          border-radius: 4px;
+          border: none;
+          cursor: pointer;
+          transition: opacity 0.15s, transform 0.1s;
+          letter-spacing: 0.02em;
+        }
+        .btn:hover { opacity: 0.85; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: var(--accent); color: #0d0d0f; }
+        .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-sm { padding: 0.3rem 0.65rem; font-size: 0.72rem; }
+        .btn-cyan { background: var(--accent2); color: #0d0d0f; }
+
+        /* FILTERS */
+        .filter-row {
+          display: flex;
+          gap: 0.6rem;
+          flex-wrap: wrap;
+          align-items: flex-end;
+          margin-bottom: 1rem;
+        }
+        .filter-row .form-group { flex: 0 1 160px; }
+
+        /* TABLE */
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        thead tr { border-bottom: 1px solid var(--border); }
+        th {
+          font-family: var(--mono);
+          font-size: 0.65rem;
+          color: var(--muted);
+          text-align: left;
+          padding: 0.5rem 0.75rem;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+        td {
+          padding: 0.6rem 0.75rem;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+          font-family: var(--mono);
+          font-size: 0.76rem;
+          vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        /* BADGES */
+        .badge {
+          display: inline-block;
+          padding: 0.15rem 0.45rem;
+          border-radius: 3px;
+          font-family: var(--mono);
+          font-size: 0.65rem;
+          font-weight: 600;
+        }
+        .badge-green { background: rgba(46,213,115,0.15); color: var(--success); }
+        .badge-red { background: rgba(255,71,87,0.15); color: var(--danger); }
+        .badge-yellow { background: rgba(232,255,71,0.12); color: var(--accent); }
+        .badge-cyan { background: rgba(71,255,232,0.12); color: var(--accent2); }
+
+        /* ID CHIPS */
+        .id-chip {
+          display: inline-block;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid var(--border);
+          border-radius: 3px;
+          padding: 0.1rem 0.35rem;
+          font-family: var(--mono);
+          font-size: 0.68rem;
+          color: var(--muted);
+        }
+
+        /* TOAST */
+        #toast-container {
+          position: fixed;
+          bottom: 1.5rem;
+          right: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          z-index: 999;
+        }
+        .toast {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-left: 3px solid var(--accent);
+          padding: 0.65rem 1rem;
+          border-radius: 4px;
+          font-family: var(--mono);
+          font-size: 0.75rem;
+          max-width: 320px;
+          animation: slideIn 0.2s ease;
+        }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.success { border-left-color: var(--success); }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* EMPTY STATE */
+        .empty {
+          text-align: center;
+          padding: 3rem;
+          color: var(--muted);
+          font-family: var(--mono);
+          font-size: 0.78rem;
+        }
+
+        /* LOADING */
+        .loading {
+          text-align: center;
+          padding: 2rem;
+          color: var(--muted);
+          font-family: var(--mono);
+          font-size: 0.75rem;
+        }
+
+        /* PAGINATION */
+        .pagination {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+          margin-top: 1rem;
+          justify-content: flex-end;
+        }
+        .pagination span {
+          font-family: var(--mono);
+          font-size: 0.72rem;
+          color: var(--muted);
+        }
+
+        /* DIVIDER */
+        .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+        /* LISTING CARD */
+        .listing-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+          gap: 1rem;
+        }
+        .listing-card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 1rem;
+          transition: border-color 0.2s;
+          cursor: pointer;
+        }
+        .listing-card:hover { border-color: var(--accent); }
+        .listing-card .lc-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .listing-card .lc-meta {
+          font-family: var(--mono);
+          font-size: 0.7rem;
+          color: var(--muted);
+          display: flex;
+          flex-direction: column;
+          gap: 0.3rem;
+        }
+        .lc-price { color: var(--accent); font-weight: 600; font-size: 1rem; }
+        .lc-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+
+        /* DETAIL PANEL */
+        .detail-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.7);
+          z-index: 200;
+          display: flex;
+          align-items: flex-start;
+          justify-content: flex-end;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.2s;
+        }
+        .detail-overlay.open { opacity: 1; pointer-events: all; }
+        .detail-panel {
+          background: var(--surface);
+          border-left: 1px solid var(--border);
+          width: 380px;
+          height: 100vh;
+          overflow-y: auto;
+          padding: 1.5rem;
+          transform: translateX(100%);
+          transition: transform 0.25s ease;
+        }
+        .detail-overlay.open .detail-panel { transform: translateX(0); }
+        .detail-close {
+          position: absolute;
+          top: 1rem;
+          right: 400px;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          color: var(--text);
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .detail-field {
+          margin-bottom: 0.75rem;
+        }
+        .detail-field .df-label {
+          font-family: var(--mono);
+          font-size: 0.65rem;
+          color: var(--muted);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          margin-bottom: 0.2rem;
+        }
+        .detail-field .df-val {
+          font-family: var(--mono);
+          font-size: 0.82rem;
+          color: var(--text);
+          background: var(--bg);
+          border: 1px solid var(--border);
+          border-radius: 4px;
+          padding: 0.35rem 0.6rem;
+          word-break: break-all;
+        }
+
+        /* responsive */
+        @media (max-width: 640px) {
+          nav { display: none; }
+          .jwt-bar { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">shop<span>X</span></div>
+    <div class="jwt-bar">
+        <label>JWT</label>
+        <span class="jwt-role-label" id="jwtRoleLabel">No token</span>
+        <div class="role-toggle">
+            <button id="btn-customer" onclick="switchRole('customer')">Customer</button>
+            <div class="divider-v"></div>
+            <button id="btn-seller" onclick="switchRole('seller')">Seller</button>
+        </div>
+        <div class="jwt-status" id="jwtStatus"></div>
+    </div>
+</header>
+
+<div class="layout">
+    <nav>
+        <div class="nav-section">Products</div>
+        <a onclick="show('products-list')" id="nav-products-list">List Products</a>
+        <a onclick="show('products-add')" id="nav-products-add">Add Product</a>
+        <a onclick="show('products-listing')" id="nav-products-listing">Listings + Stock</a>
+        <div class="nav-section">Inventory</div>
+        <a onclick="show('inventory-list')" id="nav-inventory-list">List Inventory</a>
+        <a onclick="show('inventory-add')" id="nav-inventory-add">Add Inventory</a>
+    </nav>
+
+    <main>
+
+        <!-- ===================== PRODUCTS LIST ===================== -->
+        <div class="panel" id="panel-products-list">
+            <h2>Products</h2>
+            <div class="card">
+                <div class="card-title">Filter & Search</div>
+                <div class="filter-row">
+                    <div class="form-group"><label>Name</label><input type="text" id="pl-name" placeholder="name..."></div>
+                    <div class="form-group"><label>Category</label><input type="text" id="pl-category" placeholder="category..."></div>
+                    <div class="form-group"><label>Search</label><input type="text" id="pl-search" placeholder="keyword..."></div>
+                    <div class="form-group"><label>Active</label>
+                        <select id="pl-active">
+                            <option value="">All</option>
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="justify-content:flex-end">
+                        <button class="btn btn-primary" onclick="loadProducts()">Search</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div id="products-table-wrap"><div class="loading">Enter filters and click Search</div></div>
+                <div class="pagination" id="products-pagination"></div>
+            </div>
+        </div>
+
+        <!-- ===================== ADD PRODUCT ===================== -->
+        <div class="panel" id="panel-products-add">
+            <h2>Add Product</h2>
+            <div class="card" style="max-width:500px">
+                <div class="card-title">New Product</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Name *</label><input type="text" id="ap-name" placeholder="Product name"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Category *</label><input type="text" id="ap-category" placeholder="Electronics, Clothing..."></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Description</label><input type="text" id="ap-desc" placeholder="Optional description"></div>
+                </div>
+                <button class="btn btn-primary" onclick="createProduct()">Create Product</button>
+                <div id="ap-result" style="margin-top:1rem;font-family:var(--mono);font-size:0.78rem;"></div>
+            </div>
+        </div>
+
+        <!-- ===================== PRODUCT LISTINGS ===================== -->
+        <div class="panel" id="panel-products-listing">
+            <h2>Product Listings</h2>
+            <div class="card">
+                <div class="card-title">Filter</div>
+                <div class="filter-row">
+                    <div class="form-group"><label>Name</label><input type="text" id="pls-name" placeholder="name..."></div>
+                    <div class="form-group"><label>Category</label><input type="text" id="pls-category" placeholder="category..."></div>
+                    <div class="form-group"><label>Search</label><input type="text" id="pls-search" placeholder="keyword..."></div>
+                    <div class="form-group"><label>Active</label>
+                        <select id="pls-active">
+                            <option value="">All</option>
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="justify-content:flex-end">
+                        <button class="btn btn-cyan" onclick="loadListings()">Load</button>
+                    </div>
+                </div>
+            </div>
+            <div id="listings-container"><div class="empty">Click Load to fetch listings</div></div>
+        </div>
+
+        <!-- ===================== INVENTORY LIST ===================== -->
+        <div class="panel" id="panel-inventory-list">
+            <h2>Inventory</h2>
+            <div class="card">
+                <div class="card-title">Filter</div>
+                <div class="filter-row">
+                    <div class="form-group"><label>Product ID</label><input type="number" id="il-productId" placeholder="id"></div>
+                    <div class="form-group"><label>Seller ID</label><input type="number" id="il-sellerId" placeholder="id"></div>
+                    <div class="form-group"><label>Min Qty</label><input type="number" id="il-minQty" placeholder="0"></div>
+                    <div class="form-group"><label>Max Qty</label><input type="number" id="il-maxQty" placeholder="99999"></div>
+                    <div class="form-group"><label>Min Price</label><input type="number" id="il-minPrice" placeholder="0"></div>
+                    <div class="form-group"><label>Max Price</label><input type="number" id="il-maxPrice" placeholder="99999"></div>
+                    <div class="form-group" style="justify-content:flex-end">
+                        <button class="btn btn-primary" onclick="loadInventory()">Search</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div id="inventory-table-wrap"><div class="loading">Enter filters and click Search</div></div>
+                <div class="pagination" id="inventory-pagination"></div>
+            </div>
+        </div>
+
+        <!-- ===================== ADD INVENTORY ===================== -->
+        <div class="panel" id="panel-inventory-add">
+            <h2>Add Inventory</h2>
+            <div class="card" style="max-width:500px">
+                <div class="card-title">New Inventory Entry</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Product ID *</label><input type="number" id="ai-productId" placeholder="e.g. 42"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Quantity *</label><input type="number" id="ai-quantity" placeholder="e.g. 100"></div>
+                    <div class="form-group"><label>Price *</label><input type="number" id="ai-price" placeholder="e.g. 999.99" step="0.01"></div>
+                </div>
+                <button class="btn btn-primary" onclick="createInventory()">Add Inventory</button>
+                <div id="ai-result" style="margin-top:1rem;font-family:var(--mono);font-size:0.78rem;"></div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div class="detail-overlay" id="detailOverlay" onclick="closeDetail(event)">
+    <div class="detail-panel" id="detailPanel">
+        <div id="detailContent"></div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<script>
+    const BASE = 'http://localhost:9020';
+    let jwt = '';
+    let productsPage = 0;
+    let inventoryPage = 0;
+
+    // ── ROLE TOGGLE ──
+    async function switchRole(role) {
+      const email = role === 'customer' ? 'customer@gmail.com' : 'seller@gmail.com';
+      const password = role === 'customer' ? 'customer@123' : 'seller@123';
+      toast('Fetching ' + role + ' token...', 'info');
+      try {
+        const res = await fetch(BASE + '/api/v1/auth/login?email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password), { method: 'POST' });
+        const token = (await res.text()).trim();
+        if (!token) { toast('Login failed: empty response', 'error'); return; }
+        jwt = token;
+        document.getElementById('jwtStatus').className = 'jwt-status ok';
+        document.getElementById('jwtRoleLabel').textContent = role === 'customer' ? '👤 Customer' : '🏪 Seller';
+        document.getElementById('btn-customer').className = role === 'customer' ? 'active-role' : '';
+        document.getElementById('btn-seller').className = role === 'seller' ? 'active-role' : '';
+        toast('Switched to ' + role, 'success');
+      } catch (e) {
+        toast('Login error: ' + e.message, 'error');
+      }
+    }
+
+    function headers() {
+      const h = { 'Content-Type': 'application/json' };
+      if (jwt) h['Authorization'] = 'Bearer ' + jwt;
+      return h;
+    }
+
+    // ── NAV ──
+    function show(id) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      document.getElementById('panel-' + id).classList.add('active');
+      document.getElementById('nav-' + id).classList.add('active');
+      if (id === 'products-list') loadProducts();
+      if (id === 'inventory-list') loadInventory();
+      if (id === 'products-listing') loadListings();
+    }
+
+    // ── TOAST ──
+    function toast(msg, type = 'info') {
+      const t = document.createElement('div');
+      t.className = 'toast ' + type;
+      t.textContent = msg;
+      document.getElementById('toast-container').appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    // ── API HELPER ──
+    async function api(method, path, body) {
+      try {
+        const opts = { method, headers: headers() };
+        if (body) opts.body = JSON.stringify(body);
+        const res = await fetch(BASE + path, opts);
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch { data = text; }
+        if (!res.ok) {
+          toast('Error ' + res.status + ': ' + (typeof data === 'string' ? data : JSON.stringify(data)), 'error');
+          return null;
+        }
+        return data;
+      } catch (e) {
+        toast('Network error: ' + e.message, 'error');
+        return null;
+      }
+    }
+
+    // ── PRODUCTS LIST ──
+    async function loadProducts(page = 0) {
+      productsPage = page;
+      const name = document.getElementById('pl-name').value;
+      const category = document.getElementById('pl-category').value;
+      const search = document.getElementById('pl-search').value;
+      const active = document.getElementById('pl-active').value;
+
+      let qs = `?page=${page}&size=20&sortOrder=desc`;
+      if (name) qs += '&name=' + encodeURIComponent(name);
+      if (category) qs += '&category=' + encodeURIComponent(category);
+      if (search) qs += '&search=' + encodeURIComponent(search);
+      if (active !== '') qs += '&active=' + active;
+
+      document.getElementById('products-table-wrap').innerHTML = '<div class="loading">Loading...</div>';
+      const data = await api('GET', '/api/v1/products' + qs);
+      if (!data) return;
+
+      const items = data.data || [];
+      if (!items.length) {
+        document.getElementById('products-table-wrap').innerHTML = '<div class="empty">No products found</div>';
+        document.getElementById('products-pagination').innerHTML = '';
+        return;
+      }
+
+      document.getElementById('products-table-wrap').innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>ID</th><th>Name</th><th>Category</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              ${items.map(p => `
+                <tr>
+                  <td><span class="id-chip">${p.id}</span></td>
+                  <td>${p.name || '—'}</td>
+                  <td><span class="badge badge-cyan">${p.category || '—'}</span></td>
+                  <td>
+                    <button class="btn btn-secondary btn-sm" onclick="showProductDetail(${p.id})">Detail</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">Delete</button>
+                  </td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+
+      renderPagination('products', data, loadProducts);
+    }
+
+    function renderPagination(type, data, fn) {
+      const container = document.getElementById(type + '-pagination');
+      const page = data.page ?? 0;
+      const total = data.totalPages ?? 1;
+      container.innerHTML = `
+        <span>Page ${page + 1} / ${total} &nbsp; (${data.totalElements} total)</span>
+        <button class="btn btn-secondary btn-sm" onclick="(${fn.name})(${page - 1})" ${!data.hasPrevious ? 'disabled' : ''}>← Prev</button>
+        <button class="btn btn-secondary btn-sm" onclick="(${fn.name})(${page + 1})" ${!data.hasNext ? 'disabled' : ''}>Next →</button>`;
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm('Delete product #' + id + '?')) return;
+      const res = await api('DELETE', '/api/v1/products/' + id);
+      if (res !== null) { toast('Product deleted', 'success'); loadProducts(productsPage); }
+    }
+
+    async function showProductDetail(id) {
+      const data = await api('GET', '/api/v1/products/' + id);
+      if (!data) return;
+      openDetail(`
+        <div style="margin-bottom:1.25rem">
+          <div style="font-weight:800;font-size:1.1rem;margin-bottom:0.25rem">${data.name || 'Product'}</div>
+          <span class="badge badge-cyan">${data.category || '—'}</span>
+        </div>
+        <hr class="divider">
+        <div class="detail-field"><div class="df-label">Product ID</div><div class="df-val">${data.id}</div></div>
+        <div class="detail-field"><div class="df-label">Name</div><div class="df-val">${data.name || '—'}</div></div>
+        <div class="detail-field"><div class="df-label">Category</div><div class="df-val">${data.category || '—'}</div></div>
+        <hr class="divider">
+        <button class="btn btn-secondary btn-sm" onclick="prefillInventory(${data.id})" style="margin-top:0.5rem">+ Add Inventory for this product</button>
+      `);
+    }
+
+    // ── ADD PRODUCT ──
+    async function createProduct() {
+      const name = document.getElementById('ap-name').value.trim();
+      const category = document.getElementById('ap-category').value.trim();
+      const description = document.getElementById('ap-desc').value.trim();
+      if (!name || !category) { toast('Name and category are required', 'error'); return; }
+      const data = await api('POST', '/api/v1/products', { name, category, description });
+      if (data) {
+        toast('Product created: #' + data.id, 'success');
+        document.getElementById('ap-result').innerHTML = `
+          <div style="color:var(--success)">✓ Created successfully</div>
+          <div class="detail-field" style="margin-top:0.75rem"><div class="df-label">Product ID</div><div class="df-val">${data.id}</div></div>
+          <div class="detail-field"><div class="df-label">Name</div><div class="df-val">${data.name}</div></div>
+          <div class="detail-field"><div class="df-label">Category</div><div class="df-val">${data.category}</div></div>`;
+        document.getElementById('ap-name').value = '';
+        document.getElementById('ap-category').value = '';
+        document.getElementById('ap-desc').value = '';
+      }
+    }
+
+    // ── LISTINGS ──
+    async function loadListings() {
+      const name = document.getElementById('pls-name').value;
+      const category = document.getElementById('pls-category').value;
+      const search = document.getElementById('pls-search').value;
+      const active = document.getElementById('pls-active').value;
+
+      let qs = '?';
+      if (name) qs += '&name=' + encodeURIComponent(name);
+      if (category) qs += '&category=' + encodeURIComponent(category);
+      if (search) qs += '&search=' + encodeURIComponent(search);
+      if (active !== '') qs += '&active=' + active;
+
+      document.getElementById('listings-container').innerHTML = '<div class="loading">Loading listings...</div>';
+      const data = await api('GET', '/api/v1/products/listing' + qs);
+      if (!data) return;
+
+      if (!data.length) {
+        document.getElementById('listings-container').innerHTML = '<div class="empty">No listings found</div>';
+        return;
+      }
+
+      document.getElementById('listings-container').innerHTML = `
+        <div class="listing-grid">
+          ${data.map(p => `
+            <div class="listing-card" onclick="showListingInventory(${p.productId}, '${escHtml(p.name)}', '${escHtml(p.category)}')">
+              <div class="lc-row">
+                <span class="lc-name">${p.name || '—'}</span>
+                <span class="badge ${p.active ? 'badge-green' : 'badge-red'}">${p.active ? 'active' : 'inactive'}</span>
+              </div>
+              <div class="lc-meta">
+                <span><span class="id-chip">ID: ${p.productId}</span> &nbsp; <span class="badge badge-cyan">${p.category || '—'}</span></span>
+                <span class="lc-price">₹${p.lowestPrice != null ? p.lowestPrice.toFixed(2) : '—'}</span>
+                <span>Stock: <b style="color:var(--text)">${p.totalStock ?? '—'}</b> units</span>
+              </div>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    async function showListingInventory(productId, name, category) {
+      const data = await api('GET', '/api/v1/inventory?productId=' + productId + '&size=50');
+      if (!data) return;
+      const items = data.data || [];
+      openDetail(`
+        <div style="margin-bottom:1rem">
+          <div style="font-weight:800;font-size:1.05rem;margin-bottom:0.25rem">${name}</div>
+          <span class="badge badge-cyan">${category}</span>
+          <span class="id-chip" style="margin-left:0.5rem">productId: ${productId}</span>
+        </div>
+        <hr class="divider">
+        <div style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem">Stock by Seller</div>
+        ${!items.length ? '<div class="empty" style="padding:1rem">No inventory entries</div>' :
+          items.map(inv => `
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;margin-bottom:0.6rem">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+                <span style="font-weight:600;font-size:0.85rem;color:var(--accent)">₹${inv.price?.toFixed(2) ?? '—'}</span>
+                <span style="font-family:var(--mono);font-size:0.72rem;color:var(--muted)">Qty: ${inv.quantity ?? '—'}</span>
+              </div>
+              <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+                <span class="id-chip">invId: ${inv.id}</span>
+                <span class="id-chip">productId: ${inv.productId}</span>
+                <span class="id-chip">sellerId: ${inv.sellerId}</span>
+              </div>
+            </div>`).join('')}
+        <button class="btn btn-secondary btn-sm" style="margin-top:0.5rem" onclick="prefillInventory(${productId})">+ Add Inventory for this product</button>
+      `);
+    }
+
+    // ── INVENTORY LIST ──
+    async function loadInventory(page = 0) {
+      inventoryPage = page;
+      const productId = document.getElementById('il-productId').value;
+      const sellerId = document.getElementById('il-sellerId').value;
+      const minQty = document.getElementById('il-minQty').value;
+      const maxQty = document.getElementById('il-maxQty').value;
+      const minPrice = document.getElementById('il-minPrice').value;
+      const maxPrice = document.getElementById('il-maxPrice').value;
+
+      let qs = `?page=${page}&size=20&sortOrder=desc`;
+      if (productId) qs += '&productId=' + productId;
+      if (sellerId) qs += '&sellerId=' + sellerId;
+      if (minQty) qs += '&minQuantity=' + minQty;
+      if (maxQty) qs += '&maxQuantity=' + maxQty;
+      if (minPrice) qs += '&minPrice=' + minPrice;
+      if (maxPrice) qs += '&maxPrice=' + maxPrice;
+
+      document.getElementById('inventory-table-wrap').innerHTML = '<div class="loading">Loading...</div>';
+      const data = await api('GET', '/api/v1/inventory' + qs);
+      if (!data) return;
+
+      const items = data.data || [];
+      if (!items.length) {
+        document.getElementById('inventory-table-wrap').innerHTML = '<div class="empty">No inventory found</div>';
+        document.getElementById('inventory-pagination').innerHTML = '';
+        return;
+      }
+
+      document.getElementById('inventory-table-wrap').innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Inv ID</th><th>Product ID</th><th>Seller ID</th><th>Qty</th><th>Price</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              ${items.map(inv => `
+                <tr>
+                  <td><span class="id-chip">${inv.id}</span></td>
+                  <td><span class="id-chip">${inv.productId}</span></td>
+                  <td><span class="id-chip">${inv.sellerId}</span></td>
+                  <td>${inv.quantity}</td>
+                  <td style="color:var(--accent)">₹${inv.price?.toFixed(2) ?? '—'}</td>
+                  <td>
+                    <button class="btn btn-secondary btn-sm" onclick="openEditInventory(${inv.id}, ${inv.quantity}, ${inv.price})">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteInventory(${inv.id})">Del</button>
+                  </td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+
+      renderPagination('inventory', data, loadInventory);
+    }
+
+    async function deleteInventory(id) {
+      if (!confirm('Delete inventory #' + id + '?')) return;
+      const res = await api('DELETE', '/api/v1/inventory/' + id);
+      if (res !== null) { toast('Inventory deleted', 'success'); loadInventory(inventoryPage); }
+    }
+
+    function openEditInventory(id, qty, price) {
+      openDetail(`
+        <div style="font-weight:800;font-size:1.05rem;margin-bottom:1rem">Edit Inventory</div>
+        <div class="detail-field"><div class="df-label">Inventory ID</div><div class="df-val">${id}</div></div>
+        <hr class="divider">
+        <div class="form-group" style="margin-bottom:0.75rem"><label>Quantity</label>
+          <input type="number" id="edit-qty" value="${qty}" style="background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:0.8rem;padding:0.5rem 0.7rem;border-radius:4px;outline:none;width:100%">
+        </div>
+        <div class="form-group" style="margin-bottom:1rem"><label>Price</label>
+          <input type="number" id="edit-price" value="${price}" step="0.01" style="background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:0.8rem;padding:0.5rem 0.7rem;border-radius:4px;outline:none;width:100%">
+        </div>
+        <button class="btn btn-primary" onclick="saveInventory(${id})">Save Changes</button>
+      `);
+    }
+
+    async function saveInventory(id) {
+      const quantity = parseInt(document.getElementById('edit-qty').value);
+      const price = parseFloat(document.getElementById('edit-price').value);
+      const data = await api('PUT', '/api/v1/inventory/' + id, { quantity, price });
+      if (data) {
+        toast('Inventory #' + id + ' updated', 'success');
+        closeDetailPanel();
+        loadInventory(inventoryPage);
+      }
+    }
+
+    // ── ADD INVENTORY ──
+    async function createInventory() {
+      const productId = parseInt(document.getElementById('ai-productId').value);
+      const quantity = parseInt(document.getElementById('ai-quantity').value);
+      const price = parseFloat(document.getElementById('ai-price').value);
+      if (!productId || isNaN(quantity) || isNaN(price)) { toast('All fields required', 'error'); return; }
+      const data = await api('POST', '/api/v1/inventory/create', { productId, quantity, price });
+      if (data) {
+        toast('Inventory added: #' + data.id, 'success');
+        document.getElementById('ai-result').innerHTML = `
+          <div style="color:var(--success)">✓ Created successfully</div>
+          <div class="detail-field" style="margin-top:0.75rem"><div class="df-label">Inventory ID</div><div class="df-val">${data.id}</div></div>
+          <div class="detail-field"><div class="df-label">Product ID</div><div class="df-val">${data.productId}</div></div>
+          <div class="detail-field"><div class="df-label">Seller ID</div><div class="df-val">${data.sellerId}</div></div>
+          <div class="detail-field"><div class="df-label">Quantity</div><div class="df-val">${data.quantity}</div></div>
+          <div class="detail-field"><div class="df-label">Price</div><div class="df-val">₹${data.price?.toFixed(2)}</div></div>`;
+        document.getElementById('ai-productId').value = '';
+        document.getElementById('ai-quantity').value = '';
+        document.getElementById('ai-price').value = '';
+      }
+    }
+
+    // ── DETAIL PANEL ──
+    function openDetail(html) {
+      document.getElementById('detailContent').innerHTML = html;
+      document.getElementById('detailOverlay').classList.add('open');
+    }
+    function closeDetailPanel() {
+      document.getElementById('detailOverlay').classList.remove('open');
+    }
+    function closeDetail(e) {
+      if (e.target === document.getElementById('detailOverlay')) closeDetailPanel();
+    }
+
+    function prefillInventory(productId) {
+      closeDetailPanel();
+      show('inventory-add');
+      document.getElementById('ai-productId').value = productId;
+    }
+
+    function escHtml(str) {
+      return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    // ── INIT ──
+    show('products-list');
+</script>
+</body>
+</html>

@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .authorizeExchange(ex -> ex
                         .pathMatchers(
                                 "/swagger-ui.html",
+                                "/shopx-admin.html",
                                 "/webjars/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/users/v3/api-docs",

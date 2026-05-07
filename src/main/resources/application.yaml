@@ -7,13 +7,6 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: order-service
-          uri: lb://ORDER-SERVICE
-          predicates:
-            - Path=/orders/**
-          filters:
-            - StripPrefix=1
-
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
@@ -37,6 +30,18 @@ spring:
           uri: lb://PRODUCT-SERVICE
           predicates:
             - Path=/api/v1/products/**, /api/v1/inventory/**
+
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/orders/**
+          filters:
+            - StripPrefix=1
+
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/api/v1/orders/**, /api/v1/carts/**
 
 
 springdoc:
