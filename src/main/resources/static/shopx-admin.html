@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShopX — Product Admin</title>
+    <title>ShopX — E-Commerce</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -16,6 +16,7 @@
           --muted: #6b6b7a;
           --danger: #ff4757;
           --success: #2ed573;
+          --warning: #ffa502;
           --mono: 'JetBrains Mono', monospace;
           --sans: 'Syne', sans-serif;
         }
@@ -31,18 +32,19 @@
           flex-direction: column;
         }
 
-        /* TOP BAR */
+        /* ── TOP BAR ── */
         header {
           border-bottom: 1px solid var(--border);
-          padding: 0 2rem;
+          padding: 0 1.5rem;
           display: flex;
           align-items: center;
-          gap: 2rem;
+          gap: 1rem;
           height: 56px;
           position: sticky;
           top: 0;
           background: var(--bg);
           z-index: 100;
+          flex-wrap: nowrap;
         }
         .logo {
           font-size: 1.1rem;
@@ -50,14 +52,37 @@
           letter-spacing: -0.03em;
           color: var(--accent);
           white-space: nowrap;
+          flex-shrink: 0;
         }
         .logo span { color: var(--text); }
+
+        .header-nav {
+          display: flex;
+          gap: 0.1rem;
+          flex-wrap: nowrap;
+        }
+        .header-nav button {
+          background: transparent;
+          border: none;
+          color: var(--muted);
+          padding: 0.4rem 0.8rem;
+          cursor: pointer;
+          font-family: var(--sans);
+          font-size: 0.78rem;
+          font-weight: 600;
+          border-radius: 4px;
+          transition: background 0.15s, color 0.15s;
+          white-space: nowrap;
+        }
+        .header-nav button:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+        .header-nav button.active { color: var(--accent); background: rgba(232,255,71,0.07); }
 
         .jwt-bar {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
+          gap: 0.6rem;
           margin-left: auto;
+          flex-shrink: 0;
         }
         .jwt-status {
           width: 8px; height: 8px;
@@ -81,7 +106,7 @@
           background: transparent;
           border: none;
           color: var(--muted);
-          padding: 0.38rem 0.9rem;
+          padding: 0.38rem 0.8rem;
           cursor: pointer;
           font-family: var(--mono);
           font-size: 0.72rem;
@@ -94,8 +119,7 @@
           font-weight: 600;
         }
         .role-toggle .divider-v {
-          width: 1px;
-          height: 28px;
+          width: 1px; height: 28px;
           background: var(--border);
         }
         .jwt-role-label {
@@ -105,7 +129,36 @@
           white-space: nowrap;
         }
 
-        /* LAYOUT */
+        /* Cart button in header */
+        .cart-btn {
+          background: transparent;
+          border: 1px solid var(--border);
+          color: var(--text);
+          padding: 0.38rem 0.8rem;
+          border-radius: 5px;
+          cursor: pointer;
+          font-family: var(--mono);
+          font-size: 0.72rem;
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          white-space: nowrap;
+          transition: border-color 0.2s, background 0.2s;
+          flex-shrink: 0;
+        }
+        .cart-btn:hover { border-color: var(--accent); background: rgba(232,255,71,0.05); }
+        .cart-badge {
+          background: var(--accent);
+          color: #0d0d0f;
+          font-size: 0.62rem;
+          font-weight: 700;
+          padding: 0.1rem 0.35rem;
+          border-radius: 10px;
+          min-width: 18px;
+          text-align: center;
+        }
+
+        /* ── LAYOUT ── */
         .layout { display: flex; flex: 1; overflow: hidden; }
 
         nav {
@@ -113,6 +166,7 @@
           border-right: 1px solid var(--border);
           padding: 1.5rem 0;
           flex-shrink: 0;
+          overflow-y: auto;
         }
         nav a {
           display: block;
@@ -137,15 +191,15 @@
           text-transform: uppercase;
         }
 
-        /* MAIN */
         main {
           flex: 1;
           overflow-y: auto;
           padding: 2rem;
         }
 
-        .panel { display: none; }
-        .panel.active { display: block; }
+        /* ── SECTIONS ── */
+        .section { display: none; }
+        .section.active { display: block; }
 
         h2 {
           font-size: 1.2rem;
@@ -154,7 +208,7 @@
           letter-spacing: -0.02em;
         }
 
-        /* CARD */
+        /* ── CARD ── */
         .card {
           background: var(--surface);
           border: 1px solid var(--border);
@@ -171,26 +225,11 @@
           margin-bottom: 1rem;
         }
 
-        /* FORM */
-        .form-row {
-          display: flex;
-          gap: 0.75rem;
-          flex-wrap: wrap;
-          margin-bottom: 0.75rem;
-        }
-        .form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 0.3rem;
-          flex: 1;
-          min-width: 140px;
-        }
-        .form-group label {
-          font-family: var(--mono);
-          font-size: 0.68rem;
-          color: var(--muted);
-        }
-        .form-group input, .form-group select {
+        /* ── FORMS ── */
+        .form-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 140px; }
+        .form-group label { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
+        .form-group input, .form-group select, .form-group textarea {
           background: var(--bg);
           border: 1px solid var(--border);
           color: var(--text);
@@ -201,10 +240,11 @@
           outline: none;
           transition: border-color 0.2s;
         }
-        .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
         .form-group input::placeholder { color: var(--muted); }
+        .form-group textarea { resize: vertical; min-height: 80px; }
 
-        /* BUTTONS */
+        /* ── BUTTONS ── */
         .btn {
           font-family: var(--sans);
           font-weight: 600;
@@ -221,20 +261,17 @@
         .btn-primary { background: var(--accent); color: #0d0d0f; }
         .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
         .btn-danger { background: var(--danger); color: #fff; }
-        .btn-sm { padding: 0.3rem 0.65rem; font-size: 0.72rem; }
+        .btn-success { background: var(--success); color: #0d0d0f; }
+        .btn-warning { background: var(--warning); color: #0d0d0f; }
         .btn-cyan { background: var(--accent2); color: #0d0d0f; }
+        .btn-sm { padding: 0.3rem 0.65rem; font-size: 0.72rem; }
+        .btn-full { width: 100%; }
 
-        /* FILTERS */
-        .filter-row {
-          display: flex;
-          gap: 0.6rem;
-          flex-wrap: wrap;
-          align-items: flex-end;
-          margin-bottom: 1rem;
-        }
+        /* ── FILTERS ── */
+        .filter-row { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem; }
         .filter-row .form-group { flex: 0 1 160px; }
 
-        /* TABLE */
+        /* ── TABLE ── */
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
         thead tr { border-bottom: 1px solid var(--border); }
@@ -258,7 +295,7 @@
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: rgba(255,255,255,0.02); }
 
-        /* BADGES */
+        /* ── BADGES ── */
         .badge {
           display: inline-block;
           padding: 0.15rem 0.45rem;
@@ -271,8 +308,10 @@
         .badge-red { background: rgba(255,71,87,0.15); color: var(--danger); }
         .badge-yellow { background: rgba(232,255,71,0.12); color: var(--accent); }
         .badge-cyan { background: rgba(71,255,232,0.12); color: var(--accent2); }
+        .badge-orange { background: rgba(255,165,2,0.15); color: var(--warning); }
+        .badge-muted { background: rgba(255,255,255,0.06); color: var(--muted); }
 
-        /* ID CHIPS */
+        /* ── ID CHIPS ── */
         .id-chip {
           display: inline-block;
           background: rgba(255,255,255,0.06);
@@ -284,7 +323,7 @@
           color: var(--muted);
         }
 
-        /* TOAST */
+        /* ── TOAST ── */
         #toast-container {
           position: fixed;
           bottom: 1.5rem;
@@ -292,7 +331,7 @@
           display: flex;
           flex-direction: column;
           gap: 0.5rem;
-          z-index: 999;
+          z-index: 9999;
         }
         .toast {
           background: var(--surface);
@@ -307,76 +346,164 @@
         }
         .toast.error { border-left-color: var(--danger); }
         .toast.success { border-left-color: var(--success); }
+        .toast.warning { border-left-color: var(--warning); }
         @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
 
-        /* EMPTY STATE */
-        .empty {
-          text-align: center;
-          padding: 3rem;
-          color: var(--muted);
-          font-family: var(--mono);
-          font-size: 0.78rem;
-        }
-
-        /* LOADING */
-        .loading {
-          text-align: center;
-          padding: 2rem;
-          color: var(--muted);
-          font-family: var(--mono);
-          font-size: 0.75rem;
-        }
-
-        /* PAGINATION */
-        .pagination {
-          display: flex;
-          gap: 0.5rem;
-          align-items: center;
-          margin-top: 1rem;
-          justify-content: flex-end;
-        }
-        .pagination span {
-          font-family: var(--mono);
-          font-size: 0.72rem;
-          color: var(--muted);
-        }
-
-        /* DIVIDER */
+        /* ── MISC ── */
+        .empty { text-align: center; padding: 3rem; color: var(--muted); font-family: var(--mono); font-size: 0.78rem; }
+        .loading { text-align: center; padding: 2rem; color: var(--muted); font-family: var(--mono); font-size: 0.75rem; }
         .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
 
-        /* LISTING CARD */
-        .listing-grid {
+        .pagination { display: flex; gap: 0.5rem; align-items: center; margin-top: 1rem; justify-content: flex-end; }
+        .pagination span { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+
+        /* ── STORE GRID ── */
+        .store-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
           gap: 1rem;
         }
-        .listing-card {
+        .product-card {
           background: var(--surface);
           border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 1rem;
-          transition: border-color 0.2s;
+          border-radius: 10px;
+          padding: 1.25rem;
+          transition: border-color 0.2s, transform 0.15s;
           cursor: pointer;
         }
-        .listing-card:hover { border-color: var(--accent); }
-        .listing-card .lc-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; }
-        .listing-card .lc-meta {
+        .product-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .product-card .pc-cat {
+          font-family: var(--mono);
+          font-size: 0.65rem;
+          color: var(--accent2);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          margin-bottom: 0.5rem;
+        }
+        .product-card .pc-name {
+          font-size: 1rem;
+          font-weight: 700;
+          margin-bottom: 0.75rem;
+          line-height: 1.3;
+        }
+        .product-card .pc-price {
+          font-family: var(--mono);
+          font-size: 1.15rem;
+          font-weight: 700;
+          color: var(--accent);
+          margin-bottom: 0.75rem;
+        }
+        .product-card .pc-stock {
           font-family: var(--mono);
           font-size: 0.7rem;
           color: var(--muted);
+          margin-bottom: 1rem;
+        }
+        .qty-control {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.75rem;
+        }
+        .qty-control button {
+          background: var(--bg);
+          border: 1px solid var(--border);
+          color: var(--text);
+          width: 28px; height: 28px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 1rem;
+          line-height: 1;
+          display: flex; align-items: center; justify-content: center;
+          transition: border-color 0.2s;
+        }
+        .qty-control button:hover { border-color: var(--accent); }
+        .qty-control span {
+          font-family: var(--mono);
+          font-size: 0.85rem;
+          min-width: 24px;
+          text-align: center;
+        }
+
+        /* ── CART DRAWER ── */
+        .cart-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.7);
+          z-index: 500;
+          display: flex;
+          align-items: flex-start;
+          justify-content: flex-end;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.2s;
+        }
+        .cart-overlay.open { opacity: 1; pointer-events: all; }
+        .cart-drawer {
+          background: var(--surface);
+          border-left: 1px solid var(--border);
+          width: 400px;
+          max-width: 95vw;
+          height: 100vh;
+          overflow-y: auto;
+          padding: 1.5rem;
+          transform: translateX(100%);
+          transition: transform 0.25s ease;
           display: flex;
           flex-direction: column;
-          gap: 0.3rem;
+          gap: 1rem;
         }
-        .lc-price { color: var(--accent); font-weight: 600; font-size: 1rem; }
-        .lc-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .cart-overlay.open .cart-drawer { transform: translateX(0); }
+        .cart-header { display: flex; justify-content: space-between; align-items: center; }
+        .cart-header h3 { font-size: 1rem; font-weight: 800; }
+        .cart-close {
+          background: var(--bg);
+          border: 1px solid var(--border);
+          color: var(--text);
+          width: 30px; height: 30px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 1rem;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .cart-item {
+          background: var(--bg);
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          padding: 0.75rem;
+        }
+        .cart-item .ci-name { font-weight: 600; font-size: 0.88rem; margin-bottom: 0.35rem; }
+        .cart-item .ci-meta { display: flex; justify-content: space-between; align-items: center; }
+        .cart-item .ci-price { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); }
+        .cart-item .ci-qty-ctrl { display: flex; align-items: center; gap: 0.4rem; }
+        .cart-item .ci-qty-ctrl button {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          color: var(--text);
+          width: 24px; height: 24px;
+          border-radius: 3px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .cart-item .ci-qty-ctrl span { font-family: var(--mono); font-size: 0.8rem; min-width: 20px; text-align: center; }
+        .cart-total {
+          background: var(--bg);
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          padding: 1rem;
+          font-family: var(--mono);
+          margin-top: auto;
+        }
+        .cart-total .ct-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.78rem; color: var(--muted); }
+        .cart-total .ct-total { display: flex; justify-content: space-between; font-size: 1rem; font-weight: 700; color: var(--accent); padding-top: 0.5rem; border-top: 1px solid var(--border); }
 
-        /* DETAIL PANEL */
+        /* ── DETAIL OVERLAY ── */
         .detail-overlay {
           position: fixed;
           inset: 0;
           background: rgba(0,0,0,0.7);
-          z-index: 200;
+          z-index: 300;
           display: flex;
           align-items: flex-start;
           justify-content: flex-end;
@@ -389,6 +516,7 @@
           background: var(--surface);
           border-left: 1px solid var(--border);
           width: 380px;
+          max-width: 95vw;
           height: 100vh;
           overflow-y: auto;
           padding: 1.5rem;
@@ -396,48 +524,100 @@
           transition: transform 0.25s ease;
         }
         .detail-overlay.open .detail-panel { transform: translateX(0); }
-        .detail-close {
-          position: absolute;
-          top: 1rem;
-          right: 400px;
+        .detail-field { margin-bottom: 0.75rem; }
+        .detail-field .df-label { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.2rem; }
+        .detail-field .df-val { font-family: var(--mono); font-size: 0.82rem; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.35rem 0.6rem; word-break: break-all; }
+
+        /* ── LISTING CARD ── */
+        .listing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+        .listing-card {
           background: var(--surface);
           border: 1px solid var(--border);
-          color: var(--text);
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
+          border-radius: 8px;
+          padding: 1rem;
+          transition: border-color 0.2s;
           cursor: pointer;
-          font-size: 1rem;
+        }
+        .listing-card:hover { border-color: var(--accent); }
+        .listing-card .lc-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .listing-card .lc-meta { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); display: flex; flex-direction: column; gap: 0.3rem; }
+        .lc-price { color: var(--accent); font-weight: 600; font-size: 1rem; }
+        .lc-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+
+        /* ── ORDER STATUS ── */
+        .order-status-PENDING { color: var(--warning); }
+        .order-status-CONFIRMED { color: var(--accent2); }
+        .order-status-SHIPPED { color: #a78bfa; }
+        .order-status-OUT_FOR_DELIVERY { color: var(--accent); }
+        .order-status-DELIVERED { color: var(--success); }
+        .order-status-FAILED { color: var(--danger); }
+        .order-status-CANCELLED { color: var(--muted); }
+
+        /* ── ORDER TIMELINE ── */
+        .order-timeline { position: relative; padding-left: 1.5rem; }
+        .order-timeline::before { content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 1px; background: var(--border); }
+        .tl-step { position: relative; margin-bottom: 1rem; }
+        .tl-step::before {
+          content: '';
+          position: absolute;
+          left: -1.5rem;
+          top: 6px;
+          width: 10px; height: 10px;
+          border-radius: 50%;
+          background: var(--border);
+          border: 2px solid var(--bg);
+        }
+        .tl-step.done::before { background: var(--success); }
+        .tl-step.current::before { background: var(--accent); box-shadow: 0 0 0 3px rgba(232,255,71,0.2); }
+        .tl-step .tl-label { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+        .tl-step.done .tl-label, .tl-step.current .tl-label { color: var(--text); }
+
+        /* ── CHECKOUT MODAL ── */
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.8);
+          z-index: 600;
           display: flex;
           align-items: center;
           justify-content: center;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.2s;
         }
-        .detail-field {
-          margin-bottom: 0.75rem;
-        }
-        .detail-field .df-label {
-          font-family: var(--mono);
-          font-size: 0.65rem;
-          color: var(--muted);
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          margin-bottom: 0.2rem;
-        }
-        .detail-field .df-val {
-          font-family: var(--mono);
-          font-size: 0.82rem;
-          color: var(--text);
-          background: var(--bg);
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal-box {
+          background: var(--surface);
           border: 1px solid var(--border);
-          border-radius: 4px;
-          padding: 0.35rem 0.6rem;
-          word-break: break-all;
+          border-radius: 10px;
+          padding: 2rem;
+          width: 480px;
+          max-width: 95vw;
+          max-height: 90vh;
+          overflow-y: auto;
+          transform: scale(0.95);
+          transition: transform 0.2s;
         }
+        .modal-overlay.open .modal-box { transform: scale(1); }
+        .modal-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; }
+        .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.2rem; }
 
-        /* responsive */
-        @media (max-width: 640px) {
+        /* ── STATS ── */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 1.25rem;
+        }
+        .stat-card .sc-label { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+        .stat-card .sc-val { font-size: 1.6rem; font-weight: 800; }
+        .stat-card .sc-sub { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); margin-top: 0.3rem; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
           nav { display: none; }
-          .jwt-bar { max-width: 100%; }
+          main { padding: 1rem; }
         }
     </style>
 </head>
@@ -445,8 +625,19 @@
 
 <header>
     <div class="logo">shop<span>X</span></div>
+
+    <div class="header-nav">
+        <button id="hbtn-store" onclick="switchSection('store')" class="active">🛍 Store</button>
+        <button id="hbtn-orders" onclick="switchSection('orders')">📦 Orders</button>
+        <button id="hbtn-cart-sec" onclick="switchSection('cart-section')">🛒 Cart</button>
+        <button id="hbtn-admin" onclick="switchSection('admin')">⚙ Admin</button>
+    </div>
+
     <div class="jwt-bar">
-        <label>JWT</label>
+        <button class="cart-btn" onclick="openCart()">
+            🛒 <span id="cartCount">0</span>
+            <span class="cart-badge" id="cartBadge" style="display:none">0</span>
+        </button>
         <span class="jwt-role-label" id="jwtRoleLabel">No token</span>
         <div class="role-toggle">
             <button id="btn-customer" onclick="switchRole('customer')">Customer</button>
@@ -458,204 +649,453 @@
 </header>
 
 <div class="layout">
-    <nav>
-        <div class="nav-section">Products</div>
-        <a onclick="show('products-list')" id="nav-products-list">List Products</a>
-        <a onclick="show('products-add')" id="nav-products-add">Add Product</a>
-        <a onclick="show('products-listing')" id="nav-products-listing">Listings + Stock</a>
-        <div class="nav-section">Inventory</div>
-        <a onclick="show('inventory-list')" id="nav-inventory-list">List Inventory</a>
-        <a onclick="show('inventory-add')" id="nav-inventory-add">Add Inventory</a>
+    <!-- SIDEBAR NAV -->
+    <nav id="sidebar-nav">
+        <!-- dynamically filled -->
     </nav>
 
-    <main>
+    <main id="main-content">
 
-        <!-- ===================== PRODUCTS LIST ===================== -->
-        <div class="panel" id="panel-products-list">
-            <h2>Products</h2>
-            <div class="card">
-                <div class="card-title">Filter & Search</div>
-                <div class="filter-row">
-                    <div class="form-group"><label>Name</label><input type="text" id="pl-name" placeholder="name..."></div>
-                    <div class="form-group"><label>Category</label><input type="text" id="pl-category" placeholder="category..."></div>
-                    <div class="form-group"><label>Search</label><input type="text" id="pl-search" placeholder="keyword..."></div>
-                    <div class="form-group"><label>Active</label>
-                        <select id="pl-active">
-                            <option value="">All</option>
-                            <option value="true">Active</option>
-                            <option value="false">Inactive</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="justify-content:flex-end">
-                        <button class="btn btn-primary" onclick="loadProducts()">Search</button>
+        <!-- ═══════════════════ STORE ═══════════════════ -->
+        <div class="section" id="section-store">
+
+            <!-- Store Panel: Browse -->
+            <div class="panel" id="panel-store-browse">
+                <h2>Browse Products</h2>
+                <div class="card">
+                    <div class="filter-row">
+                        <div class="form-group"><label>Search</label><input type="text" id="sb-search" placeholder="keyword..."></div>
+                        <div class="form-group"><label>Category</label><input type="text" id="sb-category" placeholder="category..."></div>
+                        <div class="form-group" style="justify-content:flex-end">
+                            <button class="btn btn-primary" onclick="loadStore()">Search</button>
+                        </div>
                     </div>
                 </div>
+                <div id="store-grid-wrap"><div class="loading">Loading products...</div></div>
             </div>
-            <div class="card">
-                <div id="products-table-wrap"><div class="loading">Enter filters and click Search</div></div>
-                <div class="pagination" id="products-pagination"></div>
-            </div>
+
         </div>
 
-        <!-- ===================== ADD PRODUCT ===================== -->
-        <div class="panel" id="panel-products-add">
-            <h2>Add Product</h2>
-            <div class="card" style="max-width:500px">
-                <div class="card-title">New Product</div>
-                <div class="form-row">
-                    <div class="form-group"><label>Name *</label><input type="text" id="ap-name" placeholder="Product name"></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Category *</label><input type="text" id="ap-category" placeholder="Electronics, Clothing..."></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Description</label><input type="text" id="ap-desc" placeholder="Optional description"></div>
-                </div>
-                <button class="btn btn-primary" onclick="createProduct()">Create Product</button>
-                <div id="ap-result" style="margin-top:1rem;font-family:var(--mono);font-size:0.78rem;"></div>
-            </div>
-        </div>
+        <!-- ═══════════════════ ORDERS ═══════════════════ -->
+        <div class="section" id="section-orders">
 
-        <!-- ===================== PRODUCT LISTINGS ===================== -->
-        <div class="panel" id="panel-products-listing">
-            <h2>Product Listings</h2>
-            <div class="card">
-                <div class="card-title">Filter</div>
-                <div class="filter-row">
-                    <div class="form-group"><label>Name</label><input type="text" id="pls-name" placeholder="name..."></div>
-                    <div class="form-group"><label>Category</label><input type="text" id="pls-category" placeholder="category..."></div>
-                    <div class="form-group"><label>Search</label><input type="text" id="pls-search" placeholder="keyword..."></div>
-                    <div class="form-group"><label>Active</label>
-                        <select id="pls-active">
-                            <option value="">All</option>
-                            <option value="true">Active</option>
-                            <option value="false">Inactive</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="justify-content:flex-end">
-                        <button class="btn btn-cyan" onclick="loadListings()">Load</button>
+            <!-- Orders Panel: List -->
+            <div class="panel" id="panel-orders-list">
+                <h2>My Orders</h2>
+                <div class="card">
+                    <div class="card-title">Filter</div>
+                    <div class="filter-row">
+                        <div class="form-group"><label>Order ID</label><input type="number" id="ol-id" placeholder="id..."></div>
+                        <div class="form-group"><label>Status</label>
+                            <select id="ol-status">
+                                <option value="">All</option>
+                                <option>PENDING</option><option>CONFIRMED</option><option>SHIPPED</option>
+                                <option>OUT_FOR_DELIVERY</option><option>DELIVERED</option><option>FAILED</option><option>CANCELLED</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>City</label><input type="text" id="ol-city" placeholder="city..."></div>
+                        <div class="form-group" style="justify-content:flex-end">
+                            <button class="btn btn-primary" onclick="loadOrders()">Search</button>
+                        </div>
                     </div>
                 </div>
+                <div class="card">
+                    <div id="orders-table-wrap"><div class="loading">Click Search to load orders</div></div>
+                    <div class="pagination" id="orders-pagination"></div>
+                </div>
             </div>
-            <div id="listings-container"><div class="empty">Click Load to fetch listings</div></div>
+
+            <!-- Orders Panel: Create -->
+            <div class="panel" id="panel-orders-create">
+                <h2>Create Order</h2>
+                <div class="card" style="max-width:560px">
+                    <div class="card-title">Order Details</div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Customer ID *</label><input type="number" id="oc-customerId" placeholder="e.g. 1"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Address *</label><input type="text" id="oc-address" placeholder="Street address"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>City *</label><input type="text" id="oc-city" placeholder="City"></div>
+                        <div class="form-group"><label>Pincode *</label><input type="text" id="oc-pincode" placeholder="123456"></div>
+                    </div>
+                    <hr class="divider">
+                    <div class="card-title">Items</div>
+                    <div id="oc-items-list">
+                        <div class="oc-item" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;margin-bottom:0.5rem">
+                            <div class="form-row" style="margin-bottom:0">
+                                <div class="form-group"><label>Product ID</label><input type="number" class="oc-productId" placeholder="productId"></div>
+                                <div class="form-group"><label>Seller ID</label><input type="number" class="oc-sellerId" placeholder="sellerId"></div>
+                                <div class="form-group"><label>Qty</label><input type="number" class="oc-qty" placeholder="1" value="1"></div>
+                                <div class="form-group" style="justify-content:flex-end;min-width:40px;max-width:40px">
+                                    <label style="visibility:hidden">X</label>
+                                    <button class="btn btn-danger btn-sm" onclick="removeOrderItem(this)">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="addOrderItem()" style="margin-bottom:1rem">+ Add Item</button>
+                    <hr class="divider">
+                    <button class="btn btn-primary btn-full" onclick="createOrder()">Place Order</button>
+                    <div id="oc-result" style="margin-top:1rem;font-family:var(--mono);font-size:0.78rem;"></div>
+                </div>
+            </div>
+
         </div>
 
-        <!-- ===================== INVENTORY LIST ===================== -->
-        <div class="panel" id="panel-inventory-list">
-            <h2>Inventory</h2>
-            <div class="card">
-                <div class="card-title">Filter</div>
-                <div class="filter-row">
-                    <div class="form-group"><label>Product ID</label><input type="number" id="il-productId" placeholder="id"></div>
-                    <div class="form-group"><label>Seller ID</label><input type="number" id="il-sellerId" placeholder="id"></div>
-                    <div class="form-group"><label>Min Qty</label><input type="number" id="il-minQty" placeholder="0"></div>
-                    <div class="form-group"><label>Max Qty</label><input type="number" id="il-maxQty" placeholder="99999"></div>
-                    <div class="form-group"><label>Min Price</label><input type="number" id="il-minPrice" placeholder="0"></div>
-                    <div class="form-group"><label>Max Price</label><input type="number" id="il-maxPrice" placeholder="99999"></div>
-                    <div class="form-group" style="justify-content:flex-end">
-                        <button class="btn btn-primary" onclick="loadInventory()">Search</button>
+        <!-- ═══════════════════ CART SECTION ═══════════════════ -->
+        <div class="section" id="section-cart-section">
+
+            <div class="panel" id="panel-cart-view">
+                <h2>My Cart</h2>
+                <div class="card" style="max-width:400px;margin-bottom:0.75rem">
+                    <div class="card-title">Load Cart</div>
+                    <div class="form-row" style="align-items:flex-end">
+                        <div class="form-group"><label>Customer ID</label><input type="number" id="cv-customerId" placeholder="e.g. 1"></div>
+                        <button class="btn btn-cyan" onclick="loadCartSection()">Load Cart</button>
                     </div>
                 </div>
+                <div id="cart-section-content"><div class="empty">Enter customer ID and click Load Cart</div></div>
             </div>
-            <div class="card">
-                <div id="inventory-table-wrap"><div class="loading">Enter filters and click Search</div></div>
-                <div class="pagination" id="inventory-pagination"></div>
+
+            <div class="panel" id="panel-cart-checkout">
+                <h2>Checkout</h2>
+                <div class="card" style="max-width:500px">
+                    <div class="card-title">Shipping Details</div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Address *</label><input type="text" id="chk-address" placeholder="Street address"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>City *</label><input type="text" id="chk-city" placeholder="City"></div>
+                        <div class="form-group"><label>Pincode *</label><input type="text" id="chk-pincode" placeholder="123456"></div>
+                    </div>
+                    <hr class="divider">
+                    <div id="chk-summary" style="margin-bottom:1rem;font-family:var(--mono);font-size:0.78rem;color:var(--muted)">No cart loaded</div>
+                    <button class="btn btn-primary btn-full" onclick="checkoutCartFromSection()">Place Order</button>
+                    <div id="chk-result" style="margin-top:1rem;font-family:var(--mono);font-size:0.78rem;"></div>
+                </div>
             </div>
+
         </div>
 
-        <!-- ===================== ADD INVENTORY ===================== -->
-        <div class="panel" id="panel-inventory-add">
-            <h2>Add Inventory</h2>
-            <div class="card" style="max-width:500px">
-                <div class="card-title">New Inventory Entry</div>
-                <div class="form-row">
-                    <div class="form-group"><label>Product ID *</label><input type="number" id="ai-productId" placeholder="e.g. 42"></div>
+        <!-- ═══════════════════ ADMIN ═══════════════════ -->
+        <div class="section" id="section-admin">
+
+            <!-- Products List -->
+            <div class="panel" id="panel-admin-products-list">
+                <h2>Products</h2>
+                <div class="card">
+                    <div class="card-title">Filter & Search</div>
+                    <div class="filter-row">
+                        <div class="form-group"><label>Name</label><input type="text" id="pl-name" placeholder="name..."></div>
+                        <div class="form-group"><label>Category</label><input type="text" id="pl-category" placeholder="category..."></div>
+                        <div class="form-group"><label>Search</label><input type="text" id="pl-search" placeholder="keyword..."></div>
+                        <div class="form-group"><label>Active</label>
+                            <select id="pl-active">
+                                <option value="">All</option>
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="justify-content:flex-end">
+                            <button class="btn btn-primary" onclick="loadProducts()">Search</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Quantity *</label><input type="number" id="ai-quantity" placeholder="e.g. 100"></div>
-                    <div class="form-group"><label>Price *</label><input type="number" id="ai-price" placeholder="e.g. 999.99" step="0.01"></div>
+                <div class="card">
+                    <div id="products-table-wrap"><div class="loading">Click Search to load</div></div>
+                    <div class="pagination" id="products-pagination"></div>
                 </div>
-                <button class="btn btn-primary" onclick="createInventory()">Add Inventory</button>
-                <div id="ai-result" style="margin-top:1rem;font-family:var(--mono);font-size:0.78rem;"></div>
             </div>
+
+            <!-- Add Product -->
+            <div class="panel" id="panel-admin-products-add">
+                <h2>Add Product</h2>
+                <div class="card" style="max-width:500px">
+                    <div class="card-title">New Product</div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Name *</label><input type="text" id="ap-name" placeholder="Product name"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Category *</label><input type="text" id="ap-category" placeholder="Electronics, Clothing..."></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Description</label><input type="text" id="ap-desc" placeholder="Optional description"></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="createProduct()">Create Product</button>
+                    <div id="ap-result" style="margin-top:1rem;font-family:var(--mono);font-size:0.78rem;"></div>
+                </div>
+            </div>
+
+            <!-- Listings -->
+            <div class="panel" id="panel-admin-listings">
+                <h2>Product Listings</h2>
+                <div class="card">
+                    <div class="card-title">Filter</div>
+                    <div class="filter-row">
+                        <div class="form-group"><label>Name</label><input type="text" id="pls-name" placeholder="name..."></div>
+                        <div class="form-group"><label>Category</label><input type="text" id="pls-category" placeholder="category..."></div>
+                        <div class="form-group"><label>Search</label><input type="text" id="pls-search" placeholder="keyword..."></div>
+                        <div class="form-group"><label>Active</label>
+                            <select id="pls-active">
+                                <option value="">All</option>
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="justify-content:flex-end">
+                            <button class="btn btn-cyan" onclick="loadListings()">Load</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="listings-container"><div class="empty">Click Load to fetch listings</div></div>
+            </div>
+
+            <!-- Inventory List -->
+            <div class="panel" id="panel-admin-inventory-list">
+                <h2>Inventory</h2>
+                <div class="card">
+                    <div class="card-title">Filter</div>
+                    <div class="filter-row">
+                        <div class="form-group"><label>Product ID</label><input type="number" id="il-productId" placeholder="id"></div>
+                        <div class="form-group"><label>Seller ID</label><input type="number" id="il-sellerId" placeholder="id"></div>
+                        <div class="form-group"><label>Min Qty</label><input type="number" id="il-minQty" placeholder="0"></div>
+                        <div class="form-group"><label>Max Qty</label><input type="number" id="il-maxQty" placeholder="99999"></div>
+                        <div class="form-group"><label>Min Price</label><input type="number" id="il-minPrice" placeholder="0"></div>
+                        <div class="form-group"><label>Max Price</label><input type="number" id="il-maxPrice" placeholder="99999"></div>
+                        <div class="form-group" style="justify-content:flex-end">
+                            <button class="btn btn-primary" onclick="loadInventory()">Search</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div id="inventory-table-wrap"><div class="loading">Click Search to load</div></div>
+                    <div class="pagination" id="inventory-pagination"></div>
+                </div>
+            </div>
+
+            <!-- Add Inventory -->
+            <div class="panel" id="panel-admin-inventory-add">
+                <h2>Add Inventory</h2>
+                <div class="card" style="max-width:500px">
+                    <div class="card-title">New Inventory Entry</div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Product ID *</label><input type="number" id="ai-productId" placeholder="e.g. 42"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Quantity *</label><input type="number" id="ai-quantity" placeholder="e.g. 100"></div>
+                        <div class="form-group"><label>Price *</label><input type="number" id="ai-price" placeholder="e.g. 999.99" step="0.01"></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="createInventory()">Add Inventory</button>
+                    <div id="ai-result" style="margin-top:1rem;font-family:var(--mono);font-size:0.78rem;"></div>
+                </div>
+            </div>
+
+            <!-- All Orders Admin -->
+            <div class="panel" id="panel-admin-orders">
+                <h2>All Orders</h2>
+                <div class="card">
+                    <div class="card-title">Filter</div>
+                    <div class="filter-row">
+                        <div class="form-group"><label>Order ID</label><input type="number" id="ao-id" placeholder="id..."></div>
+                        <div class="form-group"><label>Customer ID</label><input type="number" id="ao-customerId" placeholder="id..."></div>
+                        <div class="form-group"><label>Status</label>
+                            <select id="ao-status">
+                                <option value="">All</option>
+                                <option>PENDING</option><option>CONFIRMED</option><option>SHIPPED</option>
+                                <option>OUT_FOR_DELIVERY</option><option>DELIVERED</option><option>FAILED</option><option>CANCELLED</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>City</label><input type="text" id="ao-city" placeholder="city..."></div>
+                        <div class="form-group"><label>Delivery Partner</label><input type="text" id="ao-partner" placeholder="partner..."></div>
+                        <div class="form-group" style="justify-content:flex-end">
+                            <button class="btn btn-primary" onclick="loadAllOrders()">Search</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div id="admin-orders-table-wrap"><div class="loading">Click Search to load</div></div>
+                    <div class="pagination" id="admin-orders-pagination"></div>
+                </div>
+            </div>
+
         </div>
 
     </main>
 </div>
 
-<!-- DETAIL OVERLAY -->
-<div class="detail-overlay" id="detailOverlay" onclick="closeDetail(event)">
+<!-- ═══ CART DRAWER ═══ -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCartOutside(event)">
+    <div class="cart-drawer">
+        <div class="cart-header">
+            <h3>🛒 Cart</h3>
+            <button class="cart-close" onclick="closeCart()">✕</button>
+        </div>
+        <div style="font-family:var(--mono);font-size:0.68rem;color:var(--muted);margin-top:-0.5rem">Customer ID:
+            <input type="number" id="cart-customerId" placeholder="e.g. 1" style="background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:0.72rem;padding:0.3rem 0.5rem;border-radius:3px;margin-left:0.4rem;width:80px;outline:none" oninput="loadCartDrawer()">
+        </div>
+        <div id="cart-items-wrap"><div class="empty" style="padding:1.5rem">Enter customer ID above</div></div>
+        <div class="cart-total" id="cart-total-wrap" style="display:none">
+            <div class="ct-row"><span>Items</span><span id="ct-items">0</span></div>
+            <div class="ct-total"><span>Total</span><span id="ct-total-val">₹0</span></div>
+            <button class="btn btn-primary btn-full" style="margin-top:1rem" onclick="openCheckout()">Checkout →</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ CHECKOUT MODAL ═══ -->
+<div class="modal-overlay" id="checkoutModal">
+    <div class="modal-box">
+        <div class="modal-title">
+            Checkout
+            <button class="modal-close" onclick="closeCheckout()">✕</button>
+        </div>
+        <div class="card-title" style="margin-bottom:0.75rem">Shipping Details</div>
+        <div class="form-group" style="margin-bottom:0.75rem"><label>Address *</label><input type="text" id="co-address" placeholder="Street address"></div>
+        <div class="form-row">
+            <div class="form-group"><label>City *</label><input type="text" id="co-city" placeholder="City"></div>
+            <div class="form-group"><label>Pincode *</label><input type="text" id="co-pincode" placeholder="123456"></div>
+        </div>
+        <hr class="divider">
+        <div id="co-summary" style="font-family:var(--mono);font-size:0.78rem;color:var(--muted);margin-bottom:1rem"></div>
+        <button class="btn btn-primary btn-full" onclick="placeOrderFromCart()">Place Order</button>
+        <div id="co-result" style="margin-top:1rem;font-family:var(--mono);font-size:0.78rem;"></div>
+    </div>
+</div>
+
+<!-- ═══ DETAIL OVERLAY ═══ -->
+<div class="detail-overlay" id="detailOverlay" onclick="closeDetailOutside(event)">
     <div class="detail-panel" id="detailPanel">
         <div id="detailContent"></div>
     </div>
 </div>
 
-<!-- TOAST -->
+<!-- ═══ TOAST ═══ -->
 <div id="toast-container"></div>
 
 <script>
-    const BASE = 'http://localhost:9020';
-    let jwt = '';
-    let productsPage = 0;
-    let inventoryPage = 0;
+    // ══════════════════════════════════════════════════
+    //  CONFIG
+    // ══════════════════════════════════════════════════
+    const PRODUCT_BASE = 'http://localhost:9020';
+    const ORDER_BASE   = 'http://localhost:9020'; // adjust if order service is on different port
 
-    // ── ROLE TOGGLE ──
+    let jwt = '';
+    let currentSection = 'store';
+    let currentPanel   = {};  // section -> panelId
+    let productsPage   = 0;
+    let inventoryPage  = 0;
+    let ordersPage     = 0;
+    let adminOrdersPage = 0;
+
+    // Cart state
+    let cartData = null; // server cart response
+
+    // ══════════════════════════════════════════════════
+    //  SIDEBAR CONFIG
+    // ══════════════════════════════════════════════════
+    const SIDEBARS = {
+      store: [
+        { label: 'Browse', id: 'store-browse', icon: '🛍' }
+      ],
+      orders: [
+        { label: 'My Orders', id: 'orders-list', icon: '📋' },
+        { label: 'Create Order', id: 'orders-create', icon: '➕' }
+      ],
+      'cart-section': [
+        { label: 'View Cart', id: 'cart-view', icon: '🛒' },
+        { label: 'Checkout', id: 'cart-checkout', icon: '💳' }
+      ],
+      admin: [
+        { label: 'Products', id: 'admin-products-list', section: 'Products', icon: '' },
+        { label: 'Add Product', id: 'admin-products-add', icon: '' },
+        { label: 'Listings', id: 'admin-listings', icon: '' },
+        { label: 'Inventory', id: 'admin-inventory-list', section: 'Inventory', icon: '' },
+        { label: 'Add Inventory', id: 'admin-inventory-add', icon: '' },
+        { label: 'All Orders', id: 'admin-orders', section: 'Orders', icon: '' }
+      ]
+    };
+
+    // ══════════════════════════════════════════════════
+    //  NAVIGATION
+    // ══════════════════════════════════════════════════
+    function switchSection(sectionId) {
+      currentSection = sectionId;
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.header-nav button').forEach(b => b.classList.remove('active'));
+      document.getElementById('section-' + sectionId).classList.add('active');
+      document.getElementById('hbtn-' + sectionId).classList.add('active');
+      buildSidebar(sectionId);
+      const defaultPanel = currentPanel[sectionId] || SIDEBARS[sectionId][0].id;
+      showPanel(defaultPanel);
+      if (sectionId === 'store') loadStore();
+    }
+
+    function buildSidebar(sectionId) {
+      const nav = document.getElementById('sidebar-nav');
+      const items = SIDEBARS[sectionId] || [];
+      let html = '';
+      items.forEach(item => {
+        if (item.section) html += `<div class="nav-section">${item.section}</div>`;
+        html += `<a id="nav-${item.id}" onclick="showPanel('${item.id}')">${item.icon ? item.icon + ' ' : ''}${item.label}</a>`;
+      });
+      nav.innerHTML = html;
+    }
+
+    function showPanel(panelId) {
+      currentPanel[currentSection] = panelId;
+      const section = document.getElementById('section-' + currentSection);
+      section.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      const el = document.getElementById('panel-' + panelId);
+      if (el) el.classList.add('active');
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      const navEl = document.getElementById('nav-' + panelId);
+      if (navEl) navEl.classList.add('active');
+    }
+
+    // ══════════════════════════════════════════════════
+    //  AUTH
+    // ══════════════════════════════════════════════════
     async function switchRole(role) {
-      const email = role === 'customer' ? 'customer@gmail.com' : 'seller@gmail.com';
+      const email    = role === 'customer' ? 'customer@gmail.com' : 'seller@gmail.com';
       const password = role === 'customer' ? 'customer@123' : 'seller@123';
       toast('Fetching ' + role + ' token...', 'info');
       try {
-        const res = await fetch(BASE + '/api/v1/auth/login?email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password), { method: 'POST' });
+        const res = await fetch(PRODUCT_BASE + '/api/v1/auth/login?email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password), { method: 'POST' });
         const token = (await res.text()).trim();
         if (!token) { toast('Login failed: empty response', 'error'); return; }
         jwt = token;
         document.getElementById('jwtStatus').className = 'jwt-status ok';
         document.getElementById('jwtRoleLabel').textContent = role === 'customer' ? '👤 Customer' : '🏪 Seller';
         document.getElementById('btn-customer').className = role === 'customer' ? 'active-role' : '';
-        document.getElementById('btn-seller').className = role === 'seller' ? 'active-role' : '';
+        document.getElementById('btn-seller').className   = role === 'seller'   ? 'active-role' : '';
         toast('Switched to ' + role, 'success');
       } catch (e) {
         toast('Login error: ' + e.message, 'error');
       }
     }
 
-    function headers() {
+    function headers(base) {
       const h = { 'Content-Type': 'application/json' };
       if (jwt) h['Authorization'] = 'Bearer ' + jwt;
       return h;
     }
 
-    // ── NAV ──
-    function show(id) {
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-      document.getElementById('panel-' + id).classList.add('active');
-      document.getElementById('nav-' + id).classList.add('active');
-      if (id === 'products-list') loadProducts();
-      if (id === 'inventory-list') loadInventory();
-      if (id === 'products-listing') loadListings();
-    }
-
-    // ── TOAST ──
-    function toast(msg, type = 'info') {
-      const t = document.createElement('div');
-      t.className = 'toast ' + type;
-      t.textContent = msg;
-      document.getElementById('toast-container').appendChild(t);
-      setTimeout(() => t.remove(), 3500);
-    }
-
-    // ── API HELPER ──
-    async function api(method, path, body) {
+    // ══════════════════════════════════════════════════
+    //  API HELPER
+    // ══════════════════════════════════════════════════
+    async function api(method, path, body, base) {
+      const BASE = base || PRODUCT_BASE;
       try {
         const opts = { method, headers: headers() };
-        if (body) opts.body = JSON.stringify(body);
+        if (body !== undefined) opts.body = JSON.stringify(body);
         const res = await fetch(BASE + path, opts);
         const text = await res.text();
         let data;
         try { data = JSON.parse(text); } catch { data = text; }
         if (!res.ok) {
-          toast('Error ' + res.status + ': ' + (typeof data === 'string' ? data : JSON.stringify(data)), 'error');
+          toast('Error ' + res.status + ': ' + (typeof data === 'string' ? data : (data?.message || JSON.stringify(data))), 'error');
           return null;
         }
         return data;
@@ -665,37 +1105,478 @@
       }
     }
 
-    // ── PRODUCTS LIST ──
+    // ══════════════════════════════════════════════════
+    //  TOAST
+    // ══════════════════════════════════════════════════
+    function toast(msg, type = 'info') {
+      const t = document.createElement('div');
+      t.className = 'toast ' + type;
+      t.textContent = msg;
+      document.getElementById('toast-container').appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    // ══════════════════════════════════════════════════
+    //  DETAIL PANEL
+    // ══════════════════════════════════════════════════
+    function openDetail(html) {
+      document.getElementById('detailContent').innerHTML = html;
+      document.getElementById('detailOverlay').classList.add('open');
+    }
+    function closeDetail() { document.getElementById('detailOverlay').classList.remove('open'); }
+    function closeDetailOutside(e) { if (e.target === document.getElementById('detailOverlay')) closeDetail(); }
+
+    // ══════════════════════════════════════════════════
+    //  PAGINATION
+    // ══════════════════════════════════════════════════
+    function renderPagination(containerId, data, fn) {
+      const container = document.getElementById(containerId);
+      const page  = data.page ?? 0;
+      const total = data.totalPages ?? 1;
+      container.innerHTML = `
+        <span>Page ${page + 1} / ${total} &nbsp; (${data.totalElements} total)</span>
+        <button class="btn btn-secondary btn-sm" onclick="${fn}(${page - 1})" ${!data.hasPrevious ? 'disabled' : ''}>← Prev</button>
+        <button class="btn btn-secondary btn-sm" onclick="${fn}(${page + 1})" ${!data.hasNext ? 'disabled' : ''}>Next →</button>`;
+    }
+
+    // ══════════════════════════════════════════════════
+    //  STORE — BROWSE
+    // ══════════════════════════════════════════════════
+    async function loadStore() {
+      const search   = document.getElementById('sb-search')?.value || '';
+      const category = document.getElementById('sb-category')?.value || '';
+      let qs = '?active=true';
+      if (search)   qs += '&search=' + encodeURIComponent(search);
+      if (category) qs += '&category=' + encodeURIComponent(category);
+      document.getElementById('store-grid-wrap').innerHTML = '<div class="loading">Loading products...</div>';
+      const data = await api('GET', '/api/v1/products/listing' + qs);
+      if (!data) return;
+      if (!data.length) {
+        document.getElementById('store-grid-wrap').innerHTML = '<div class="empty">No products found</div>';
+        return;
+      }
+      document.getElementById('store-grid-wrap').innerHTML = `
+        <div class="store-grid">
+          ${data.map(p => `
+            <div class="product-card">
+              <div class="pc-cat">${p.category || '—'}</div>
+              <div class="pc-name">${p.name || '—'}</div>
+              <div class="pc-price">₹${p.lowestPrice != null ? p.lowestPrice.toFixed(2) : '—'}</div>
+              <div class="pc-stock">Stock: ${p.totalStock ?? '—'} units</div>
+              <div class="qty-control" id="qty-ctrl-${p.productId}">
+                <button onclick="changeQty(${p.productId}, -1)">−</button>
+                <span id="qty-${p.productId}">1</span>
+                <button onclick="changeQty(${p.productId}, 1)">+</button>
+              </div>
+              <button class="btn btn-primary" style="width:100%;font-size:0.78rem" onclick="quickAddToCart(${p.productId})">Add to Cart</button>
+              <button class="btn btn-secondary btn-sm" style="width:100%;margin-top:0.5rem" onclick="showStoreDetail(${p.productId}, '${escHtml(p.name)}', '${escHtml(p.category)}')">View Details</button>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    function changeQty(productId, delta) {
+      const el = document.getElementById('qty-' + productId);
+      if (!el) return;
+      let v = parseInt(el.textContent) + delta;
+      if (v < 1) v = 1;
+      if (v > 99) v = 99;
+      el.textContent = v;
+    }
+
+    async function quickAddToCart(productId) {
+      const custId = prompt('Enter your Customer ID:');
+      if (!custId) return;
+      const qty = parseInt(document.getElementById('qty-' + productId)?.textContent || '1');
+      // We need a sellerId — fetch inventory first
+      const inv = await api('GET', '/api/v1/inventory?productId=' + productId + '&size=1');
+      if (!inv || !inv.data || !inv.data.length) { toast('No inventory for this product', 'error'); return; }
+      const sellerId = inv.data[0].sellerId;
+      const res = await api('POST', `/api/v1/carts/${custId}`, { productId, sellerId, quantity: qty }, ORDER_BASE);
+      if (res) {
+        toast('Added to cart ✓', 'success');
+        updateCartBadge(res);
+      }
+    }
+
+    async function showStoreDetail(productId, name, category) {
+      const inv = await api('GET', '/api/v1/inventory?productId=' + productId + '&size=20');
+      if (!inv) return;
+      const items = inv.data || [];
+      openDetail(`
+        <div style="margin-bottom:1rem">
+          <div style="font-weight:800;font-size:1.1rem;margin-bottom:0.25rem">${name}</div>
+          <span class="badge badge-cyan">${category}</span>
+          <span class="id-chip" style="margin-left:0.5rem">ID: ${productId}</span>
+        </div>
+        <hr class="divider">
+        <div style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem">Available Sellers</div>
+        ${!items.length ? '<div class="empty" style="padding:1rem">No inventory</div>' :
+          items.map(inv => `
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;margin-bottom:0.6rem">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+                <span style="font-weight:700;font-size:0.9rem;color:var(--accent)">₹${inv.price?.toFixed(2) ?? '—'}</span>
+                <span style="font-family:var(--mono);font-size:0.72rem;color:var(--muted)">Qty: ${inv.quantity ?? '—'}</span>
+              </div>
+              <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.6rem">
+                <span class="id-chip">sellerId: ${inv.sellerId}</span>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="addItemFromDetail(${productId}, ${inv.sellerId})">Add to Cart</button>
+            </div>`).join('')}
+      `);
+    }
+
+    async function addItemFromDetail(productId, sellerId) {
+      const custId = prompt('Enter your Customer ID:');
+      if (!custId) return;
+      const res = await api('POST', `/api/v1/carts/${custId}`, { productId, sellerId, quantity: 1 }, ORDER_BASE);
+      if (res) { toast('Added to cart ✓', 'success'); updateCartBadge(res); }
+    }
+
+    // ══════════════════════════════════════════════════
+    //  CART DRAWER
+    // ══════════════════════════════════════════════════
+    function openCart() { document.getElementById('cartOverlay').classList.add('open'); }
+    function closeCart() { document.getElementById('cartOverlay').classList.remove('open'); }
+    function closeCartOutside(e) { if (e.target === document.getElementById('cartOverlay')) closeCart(); }
+
+    async function loadCartDrawer() {
+      const custId = document.getElementById('cart-customerId').value;
+      if (!custId) return;
+      const data = await api('GET', `/api/v1/carts/${custId}`, undefined, ORDER_BASE);
+      if (!data) return;
+      cartData = data;
+      renderCartDrawer(data);
+    }
+
+    function renderCartDrawer(data) {
+      const items = data.items || [];
+      if (!items.length) {
+        document.getElementById('cart-items-wrap').innerHTML = '<div class="empty" style="padding:1.5rem">Cart is empty</div>';
+        document.getElementById('cart-total-wrap').style.display = 'none';
+        updateCartBadge(data);
+        return;
+      }
+      document.getElementById('cart-items-wrap').innerHTML = items.map(item => `
+        <div class="cart-item">
+          <div class="ci-name">Product #${item.productId}</div>
+          <div class="ci-meta">
+            <span class="ci-price">Seller #${item.sellerId}</span>
+            <div class="ci-qty-ctrl">
+              <button onclick="updateCartItem(${data.customerId}, ${item.productId}, ${item.quantity - 1})">−</button>
+              <span>${item.quantity}</span>
+              <button onclick="updateCartItem(${data.customerId}, ${item.productId}, ${item.quantity + 1})">+</button>
+              <button onclick="removeCartItem(${data.customerId}, ${item.productId})" style="color:var(--danger);margin-left:0.3rem">🗑</button>
+            </div>
+          </div>
+        </div>`).join('');
+
+      document.getElementById('ct-items').textContent = items.reduce((a, i) => a + i.quantity, 0);
+      document.getElementById('ct-total-val').textContent = '₹— (see order total)';
+      document.getElementById('cart-total-wrap').style.display = 'block';
+      updateCartBadge(data);
+    }
+
+    async function updateCartItem(custId, productId, qty) {
+      if (qty < 1) { return removeCartItem(custId, productId); }
+      const res = await api('PUT', `/api/v1/carts/${custId}/items/${productId}?quantity=${qty}`, undefined, ORDER_BASE);
+      if (res) { cartData = res; renderCartDrawer(res); }
+    }
+
+    async function removeCartItem(custId, productId) {
+      await api('DELETE', `/api/v1/carts/${custId}/items/${productId}`, undefined, ORDER_BASE);
+      await loadCartDrawer();
+    }
+
+    async function clearCart() {
+      const custId = document.getElementById('cart-customerId').value;
+      if (!custId) return;
+      if (!confirm('Clear entire cart?')) return;
+      await api('DELETE', `/api/v1/carts/${custId}`, undefined, ORDER_BASE);
+      cartData = null;
+      document.getElementById('cart-items-wrap').innerHTML = '<div class="empty" style="padding:1.5rem">Cart cleared</div>';
+      document.getElementById('cart-total-wrap').style.display = 'none';
+      document.getElementById('cart-customerId').value = '';
+      updateCartBadgeCount(0);
+    }
+
+    function updateCartBadge(data) {
+      const count = (data?.items || []).reduce((a, i) => a + i.quantity, 0);
+      updateCartBadgeCount(count);
+    }
+
+    function updateCartBadgeCount(count) {
+      document.getElementById('cartCount').textContent = count;
+      const badge = document.getElementById('cartBadge');
+      if (count > 0) { badge.style.display = 'inline'; badge.textContent = count; }
+      else badge.style.display = 'none';
+    }
+
+    // ══════════════════════════════════════════════════
+    //  CHECKOUT MODAL (from drawer)
+    // ══════════════════════════════════════════════════
+    function openCheckout() {
+      const custId = document.getElementById('cart-customerId').value;
+      const items  = cartData?.items || [];
+      document.getElementById('co-summary').textContent = `Customer #${custId} · ${items.length} product(s) · ${items.reduce((a,i)=>a+i.quantity,0)} items`;
+      document.getElementById('co-result').innerHTML = '';
+      document.getElementById('checkoutModal').classList.add('open');
+    }
+    function closeCheckout() { document.getElementById('checkoutModal').classList.remove('open'); }
+
+    async function placeOrderFromCart() {
+      const custId  = document.getElementById('cart-customerId').value;
+      const cartId  = cartData?.cartId;
+      const address = document.getElementById('co-address').value.trim();
+      const city    = document.getElementById('co-city').value.trim();
+      const pincode = document.getElementById('co-pincode').value.trim();
+      if (!address || !city || !pincode) { toast('Fill all shipping fields', 'error'); return; }
+      if (!custId || !cartId) { toast('Cart not loaded', 'error'); return; }
+
+      const res = await api('POST', `/api/v1/orders/checkout-cart?customerId=${custId}&cartId=${cartId}`, undefined, ORDER_BASE);
+      if (res) {
+        document.getElementById('co-result').innerHTML = `
+          <div style="color:var(--success)">✓ Order placed!</div>
+          <div class="detail-field" style="margin-top:0.75rem"><div class="df-label">Order ID</div><div class="df-val">${res.orderId}</div></div>
+          <div class="detail-field"><div class="df-label">Total</div><div class="df-val">₹${res.totalAmount?.toFixed(2)}</div></div>
+          <div class="detail-field"><div class="df-label">Status</div><div class="df-val">${res.status}</div></div>`;
+        cartData = null;
+        updateCartBadgeCount(0);
+        toast('Order #' + res.orderId + ' placed!', 'success');
+      }
+    }
+
+    // ══════════════════════════════════════════════════
+    //  CART SECTION
+    // ══════════════════════════════════════════════════
+    async function loadCartSection() {
+      const custId = document.getElementById('cv-customerId').value;
+      if (!custId) { toast('Enter Customer ID', 'error'); return; }
+      const data = await api('GET', `/api/v1/carts/${custId}`, undefined, ORDER_BASE);
+      if (!data) return;
+      cartData = data;
+      const items = data.items || [];
+      if (!items.length) {
+        document.getElementById('cart-section-content').innerHTML = '<div class="empty">Cart is empty</div>';
+        return;
+      }
+      document.getElementById('cart-section-content').innerHTML = `
+        <div class="card" style="max-width:560px">
+          <div class="card-title">Cart — Customer #${data.customerId} &nbsp; <span class="id-chip">cartId: ${data.cartId}</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Product ID</th><th>Seller ID</th><th>Qty</th><th>Actions</th></tr></thead>
+              <tbody>
+                ${items.map(item => `
+                  <tr>
+                    <td><span class="id-chip">${item.productId}</span></td>
+                    <td><span class="id-chip">${item.sellerId}</span></td>
+                    <td>${item.quantity}</td>
+                    <td>
+                      <button class="btn btn-secondary btn-sm" onclick="updateCartItem(${data.customerId}, ${item.productId}, ${item.quantity - 1})">−</button>
+                      <button class="btn btn-secondary btn-sm" onclick="updateCartItem(${data.customerId}, ${item.productId}, ${item.quantity + 1})">+</button>
+                      <button class="btn btn-danger btn-sm" onclick="removeCartItem(${data.customerId}, ${item.productId})">Remove</button>
+                    </td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="showPanel('cart-checkout');prefillCheckout(${data.customerId})">Proceed to Checkout</button>
+            <button class="btn btn-danger btn-sm" onclick="clearCartSection(${data.customerId})">Clear Cart</button>
+          </div>
+        </div>`;
+    }
+
+    function prefillCheckout(custId) {
+      document.getElementById('chk-summary').textContent = 'Customer #' + custId + ' · ' + (cartData?.items?.length || 0) + ' product(s)';
+    }
+
+    async function clearCartSection(custId) {
+      if (!confirm('Clear entire cart?')) return;
+      await api('DELETE', `/api/v1/carts/${custId}`, undefined, ORDER_BASE);
+      toast('Cart cleared', 'success');
+      cartData = null;
+      document.getElementById('cart-section-content').innerHTML = '<div class="empty">Cart cleared</div>';
+      updateCartBadgeCount(0);
+    }
+
+    async function checkoutCartFromSection() {
+      const custId  = document.getElementById('cv-customerId').value;
+      const address = document.getElementById('chk-address').value.trim();
+      const city    = document.getElementById('chk-city').value.trim();
+      const pincode = document.getElementById('chk-pincode').value.trim();
+      if (!address || !city || !pincode) { toast('Fill all shipping fields', 'error'); return; }
+      if (!cartData) { toast('Load cart first', 'error'); return; }
+      const res = await api('POST', `/api/v1/orders/checkout-cart?customerId=${custId}&cartId=${cartData.cartId}`, undefined, ORDER_BASE);
+      if (res) {
+        document.getElementById('chk-result').innerHTML = `<div style="color:var(--success)">✓ Order #${res.orderId} placed! Total: ₹${res.totalAmount?.toFixed(2)}</div>`;
+        cartData = null;
+        updateCartBadgeCount(0);
+        toast('Order #' + res.orderId + ' placed!', 'success');
+      }
+    }
+
+    // ══════════════════════════════════════════════════
+    //  ORDERS
+    // ══════════════════════════════════════════════════
+    async function loadOrders(page = 0) {
+      ordersPage = page;
+      const id     = document.getElementById('ol-id').value;
+      const status = document.getElementById('ol-status').value;
+      const city   = document.getElementById('ol-city').value;
+      let qs = `?page=${page}&size=20&sortOrder=desc`;
+      if (id)     qs += '&id=' + id;
+      if (status) qs += '&status=' + status;
+      if (city)   qs += '&city=' + encodeURIComponent(city);
+      document.getElementById('orders-table-wrap').innerHTML = '<div class="loading">Loading...</div>';
+      const data = await api('GET', '/api/v1/orders' + qs, undefined, ORDER_BASE);
+      if (!data) return;
+      const items = data.data || [];
+      if (!items.length) {
+        document.getElementById('orders-table-wrap').innerHTML = '<div class="empty">No orders found</div>';
+        document.getElementById('orders-pagination').innerHTML = '';
+        return;
+      }
+      document.getElementById('orders-table-wrap').innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th><th>City</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${items.map(o => `
+                <tr>
+                  <td><span class="id-chip">${o.id}</span></td>
+                  <td><span class="id-chip">${o.customerId}</span></td>
+                  <td style="color:var(--accent)">₹${o.totalAmount?.toFixed(2) ?? '—'}</td>
+                  <td><span class="order-status-${o.status}">${o.status}</span></td>
+                  <td>${o.city || '—'}</td>
+                  <td>
+                    <button class="btn btn-secondary btn-sm" onclick="showOrderDetail(${o.id})">Detail</button>
+                    <button class="btn btn-warning btn-sm" onclick="cancelOrder(${o.id})">Cancel</button>
+                  </td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+      renderPagination('orders-pagination', data, 'loadOrders');
+    }
+
+    async function showOrderDetail(id) {
+      const data = await api('GET', '/api/v1/orders/' + id, undefined, ORDER_BASE);
+      if (!data) return;
+      const STATUSES = ['PENDING','CONFIRMED','SHIPPED','OUT_FOR_DELIVERY','DELIVERED'];
+      const currentIdx = STATUSES.indexOf(data.status);
+      openDetail(`
+        <div style="font-weight:800;font-size:1.1rem;margin-bottom:0.25rem">Order #${data.orderId}</div>
+        <span class="order-status-${data.status}" style="font-family:var(--mono);font-size:0.8rem;font-weight:700">${data.status}</span>
+        <hr class="divider">
+        <div class="detail-field"><div class="df-label">Customer ID</div><div class="df-val">${data.customerId}</div></div>
+        <div class="detail-field"><div class="df-label">Total Amount</div><div class="df-val" style="color:var(--accent)">₹${data.totalAmount?.toFixed(2) ?? '—'}</div></div>
+        <div class="detail-field"><div class="df-label">Address</div><div class="df-val">${[data.address, data.city, data.pincode].filter(Boolean).join(', ')}</div></div>
+        <hr class="divider">
+        <div class="card-title" style="margin-bottom:0.5rem">Order Progress</div>
+        <div class="order-timeline">
+          ${STATUSES.map((s, i) => `
+            <div class="tl-step ${i < currentIdx ? 'done' : ''} ${i === currentIdx ? 'current' : ''}">
+              <div class="tl-label">${s.replace(/_/g,' ')}</div>
+            </div>`).join('')}
+        </div>
+        <hr class="divider">
+        <div class="card-title" style="margin-bottom:0.5rem">Items</div>
+        ${(data.items || []).map(item => `
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:0.6rem;margin-bottom:0.5rem;font-family:var(--mono);font-size:0.74rem">
+            <span class="id-chip">product: ${item.productId}</span>
+            <span class="id-chip" style="margin-left:0.3rem">seller: ${item.sellerId}</span>
+            <span style="float:right;color:var(--accent)">₹${item.price?.toFixed(2) ?? '—'} × ${item.quantity}</span>
+          </div>`).join('')}
+        <hr class="divider">
+        <button class="btn btn-danger btn-sm" onclick="cancelOrder(${data.orderId});closeDetail()">Cancel Order</button>
+      `);
+    }
+
+    async function cancelOrder(id) {
+      if (!confirm('Cancel order #' + id + '?')) return;
+      const res = await api('PATCH', '/api/v1/orders/' + id + '/cancel', undefined, ORDER_BASE);
+      if (res) { toast('Order #' + id + ' cancelled', 'success'); loadOrders(ordersPage); }
+    }
+
+    // ══════════════════════════════════════════════════
+    //  ORDER: CREATE MANUALLY
+    // ══════════════════════════════════════════════════
+    function addOrderItem() {
+      const div = document.createElement('div');
+      div.className = 'oc-item';
+      div.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;margin-bottom:0.5rem';
+      div.innerHTML = `
+        <div class="form-row" style="margin-bottom:0">
+          <div class="form-group"><label>Product ID</label><input type="number" class="oc-productId" placeholder="productId"></div>
+          <div class="form-group"><label>Seller ID</label><input type="number" class="oc-sellerId" placeholder="sellerId"></div>
+          <div class="form-group"><label>Qty</label><input type="number" class="oc-qty" placeholder="1" value="1"></div>
+          <div class="form-group" style="justify-content:flex-end;min-width:40px;max-width:40px">
+            <label style="visibility:hidden">X</label>
+            <button class="btn btn-danger btn-sm" onclick="removeOrderItem(this)">✕</button>
+          </div>
+        </div>`;
+      document.getElementById('oc-items-list').appendChild(div);
+    }
+
+    function removeOrderItem(btn) {
+      const item = btn.closest('.oc-item');
+      if (item) item.remove();
+    }
+
+    async function createOrder() {
+      const customerId = parseInt(document.getElementById('oc-customerId').value);
+      const address    = document.getElementById('oc-address').value.trim();
+      const city       = document.getElementById('oc-city').value.trim();
+      const pincode    = document.getElementById('oc-pincode').value.trim();
+      if (!customerId || !address || !city || !pincode) { toast('Fill all required fields', 'error'); return; }
+
+      const itemEls = document.querySelectorAll('#oc-items-list .oc-item');
+      const items = Array.from(itemEls).map(el => ({
+        productId: parseInt(el.querySelector('.oc-productId').value),
+        sellerId: parseInt(el.querySelector('.oc-sellerId').value),
+        quantity: parseInt(el.querySelector('.oc-qty').value)
+      })).filter(i => i.productId && i.sellerId && i.quantity);
+
+      if (!items.length) { toast('Add at least one item', 'error'); return; }
+      const res = await api('POST', '/api/v1/orders', { customerId, address, city, pincode, items }, ORDER_BASE);
+      if (res) {
+        toast('Order #' + res.orderId + ' created!', 'success');
+        document.getElementById('oc-result').innerHTML = `
+          <div style="color:var(--success)">✓ Order placed!</div>
+          <div class="detail-field" style="margin-top:0.75rem"><div class="df-label">Order ID</div><div class="df-val">${res.orderId}</div></div>
+          <div class="detail-field"><div class="df-label">Status</div><div class="df-val">${res.status}</div></div>
+          <div class="detail-field"><div class="df-label">Total</div><div class="df-val">₹${res.totalAmount?.toFixed(2) ?? '—'}</div></div>`;
+      }
+    }
+
+    // ══════════════════════════════════════════════════
+    //  ADMIN — PRODUCTS
+    // ══════════════════════════════════════════════════
     async function loadProducts(page = 0) {
       productsPage = page;
-      const name = document.getElementById('pl-name').value;
+      const name     = document.getElementById('pl-name').value;
       const category = document.getElementById('pl-category').value;
-      const search = document.getElementById('pl-search').value;
-      const active = document.getElementById('pl-active').value;
-
+      const search   = document.getElementById('pl-search').value;
+      const active   = document.getElementById('pl-active').value;
       let qs = `?page=${page}&size=20&sortOrder=desc`;
-      if (name) qs += '&name=' + encodeURIComponent(name);
-      if (category) qs += '&category=' + encodeURIComponent(category);
-      if (search) qs += '&search=' + encodeURIComponent(search);
-      if (active !== '') qs += '&active=' + active;
-
+      if (name)           qs += '&name=' + encodeURIComponent(name);
+      if (category)       qs += '&category=' + encodeURIComponent(category);
+      if (search)         qs += '&search=' + encodeURIComponent(search);
+      if (active !== '')  qs += '&active=' + active;
       document.getElementById('products-table-wrap').innerHTML = '<div class="loading">Loading...</div>';
       const data = await api('GET', '/api/v1/products' + qs);
       if (!data) return;
-
       const items = data.data || [];
       if (!items.length) {
         document.getElementById('products-table-wrap').innerHTML = '<div class="empty">No products found</div>';
         document.getElementById('products-pagination').innerHTML = '';
         return;
       }
-
       document.getElementById('products-table-wrap').innerHTML = `
         <div class="table-wrap">
           <table>
-            <thead><tr>
-              <th>ID</th><th>Name</th><th>Category</th><th>Actions</th>
-            </tr></thead>
+            <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Actions</th></tr></thead>
             <tbody>
               ${items.map(p => `
                 <tr>
@@ -710,18 +1591,7 @@
             </tbody>
           </table>
         </div>`;
-
-      renderPagination('products', data, loadProducts);
-    }
-
-    function renderPagination(type, data, fn) {
-      const container = document.getElementById(type + '-pagination');
-      const page = data.page ?? 0;
-      const total = data.totalPages ?? 1;
-      container.innerHTML = `
-        <span>Page ${page + 1} / ${total} &nbsp; (${data.totalElements} total)</span>
-        <button class="btn btn-secondary btn-sm" onclick="(${fn.name})(${page - 1})" ${!data.hasPrevious ? 'disabled' : ''}>← Prev</button>
-        <button class="btn btn-secondary btn-sm" onclick="(${fn.name})(${page + 1})" ${!data.hasNext ? 'disabled' : ''}>Next →</button>`;
+      renderPagination('products-pagination', data, 'loadProducts');
     }
 
     async function deleteProduct(id) {
@@ -747,48 +1617,44 @@
       `);
     }
 
-    // ── ADD PRODUCT ──
     async function createProduct() {
-      const name = document.getElementById('ap-name').value.trim();
-      const category = document.getElementById('ap-category').value.trim();
+      const name        = document.getElementById('ap-name').value.trim();
+      const category    = document.getElementById('ap-category').value.trim();
       const description = document.getElementById('ap-desc').value.trim();
       if (!name || !category) { toast('Name and category are required', 'error'); return; }
       const data = await api('POST', '/api/v1/products', { name, category, description });
       if (data) {
         toast('Product created: #' + data.id, 'success');
         document.getElementById('ap-result').innerHTML = `
-          <div style="color:var(--success)">✓ Created successfully</div>
+          <div style="color:var(--success)">✓ Created</div>
           <div class="detail-field" style="margin-top:0.75rem"><div class="df-label">Product ID</div><div class="df-val">${data.id}</div></div>
-          <div class="detail-field"><div class="df-label">Name</div><div class="df-val">${data.name}</div></div>
-          <div class="detail-field"><div class="df-label">Category</div><div class="df-val">${data.category}</div></div>`;
+          <div class="detail-field"><div class="df-label">Name</div><div class="df-val">${data.name}</div></div>`;
         document.getElementById('ap-name').value = '';
         document.getElementById('ap-category').value = '';
         document.getElementById('ap-desc').value = '';
       }
     }
 
-    // ── LISTINGS ──
+    // ══════════════════════════════════════════════════
+    //  ADMIN — LISTINGS
+    // ══════════════════════════════════════════════════
     async function loadListings() {
-      const name = document.getElementById('pls-name').value;
+      const name     = document.getElementById('pls-name').value;
       const category = document.getElementById('pls-category').value;
-      const search = document.getElementById('pls-search').value;
-      const active = document.getElementById('pls-active').value;
-
+      const search   = document.getElementById('pls-search').value;
+      const active   = document.getElementById('pls-active').value;
       let qs = '?';
-      if (name) qs += '&name=' + encodeURIComponent(name);
-      if (category) qs += '&category=' + encodeURIComponent(category);
-      if (search) qs += '&search=' + encodeURIComponent(search);
+      if (name)          qs += '&name=' + encodeURIComponent(name);
+      if (category)      qs += '&category=' + encodeURIComponent(category);
+      if (search)        qs += '&search=' + encodeURIComponent(search);
       if (active !== '') qs += '&active=' + active;
-
       document.getElementById('listings-container').innerHTML = '<div class="loading">Loading listings...</div>';
       const data = await api('GET', '/api/v1/products/listing' + qs);
       if (!data) return;
-
       if (!data.length) {
         document.getElementById('listings-container').innerHTML = '<div class="empty">No listings found</div>';
         return;
       }
-
       document.getElementById('listings-container').innerHTML = `
         <div class="listing-grid">
           ${data.map(p => `
@@ -817,7 +1683,7 @@
           <span class="id-chip" style="margin-left:0.5rem">productId: ${productId}</span>
         </div>
         <hr class="divider">
-        <div style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem">Stock by Seller</div>
+        <div class="card-title" style="margin-bottom:0.75rem">Stock by Seller</div>
         ${!items.length ? '<div class="empty" style="padding:1rem">No inventory entries</div>' :
           items.map(inv => `
             <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;margin-bottom:0.6rem">
@@ -825,51 +1691,48 @@
                 <span style="font-weight:600;font-size:0.85rem;color:var(--accent)">₹${inv.price?.toFixed(2) ?? '—'}</span>
                 <span style="font-family:var(--mono);font-size:0.72rem;color:var(--muted)">Qty: ${inv.quantity ?? '—'}</span>
               </div>
-              <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+              <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.5rem">
                 <span class="id-chip">invId: ${inv.id}</span>
-                <span class="id-chip">productId: ${inv.productId}</span>
                 <span class="id-chip">sellerId: ${inv.sellerId}</span>
               </div>
+              <button class="btn btn-secondary btn-sm" onclick="openEditInventory(${inv.id}, ${inv.quantity}, ${inv.price})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteInventory(${inv.id})">Delete</button>
             </div>`).join('')}
-        <button class="btn btn-secondary btn-sm" style="margin-top:0.5rem" onclick="prefillInventory(${productId})">+ Add Inventory for this product</button>
+        <button class="btn btn-secondary btn-sm" style="margin-top:0.5rem" onclick="prefillInventory(${productId})">+ Add Inventory</button>
       `);
     }
 
-    // ── INVENTORY LIST ──
+    // ══════════════════════════════════════════════════
+    //  ADMIN — INVENTORY
+    // ══════════════════════════════════════════════════
     async function loadInventory(page = 0) {
       inventoryPage = page;
       const productId = document.getElementById('il-productId').value;
-      const sellerId = document.getElementById('il-sellerId').value;
-      const minQty = document.getElementById('il-minQty').value;
-      const maxQty = document.getElementById('il-maxQty').value;
-      const minPrice = document.getElementById('il-minPrice').value;
-      const maxPrice = document.getElementById('il-maxPrice').value;
-
+      const sellerId  = document.getElementById('il-sellerId').value;
+      const minQty    = document.getElementById('il-minQty').value;
+      const maxQty    = document.getElementById('il-maxQty').value;
+      const minPrice  = document.getElementById('il-minPrice').value;
+      const maxPrice  = document.getElementById('il-maxPrice').value;
       let qs = `?page=${page}&size=20&sortOrder=desc`;
       if (productId) qs += '&productId=' + productId;
-      if (sellerId) qs += '&sellerId=' + sellerId;
-      if (minQty) qs += '&minQuantity=' + minQty;
-      if (maxQty) qs += '&maxQuantity=' + maxQty;
-      if (minPrice) qs += '&minPrice=' + minPrice;
-      if (maxPrice) qs += '&maxPrice=' + maxPrice;
-
+      if (sellerId)  qs += '&sellerId=' + sellerId;
+      if (minQty)    qs += '&minQuantity=' + minQty;
+      if (maxQty)    qs += '&maxQuantity=' + maxQty;
+      if (minPrice)  qs += '&minPrice=' + minPrice;
+      if (maxPrice)  qs += '&maxPrice=' + maxPrice;
       document.getElementById('inventory-table-wrap').innerHTML = '<div class="loading">Loading...</div>';
       const data = await api('GET', '/api/v1/inventory' + qs);
       if (!data) return;
-
       const items = data.data || [];
       if (!items.length) {
         document.getElementById('inventory-table-wrap').innerHTML = '<div class="empty">No inventory found</div>';
         document.getElementById('inventory-pagination').innerHTML = '';
         return;
       }
-
       document.getElementById('inventory-table-wrap').innerHTML = `
         <div class="table-wrap">
           <table>
-            <thead><tr>
-              <th>Inv ID</th><th>Product ID</th><th>Seller ID</th><th>Qty</th><th>Price</th><th>Actions</th>
-            </tr></thead>
+            <thead><tr><th>Inv ID</th><th>Product ID</th><th>Seller ID</th><th>Qty</th><th>Price</th><th>Actions</th></tr></thead>
             <tbody>
               ${items.map(inv => `
                 <tr>
@@ -886,8 +1749,7 @@
             </tbody>
           </table>
         </div>`;
-
-      renderPagination('inventory', data, loadInventory);
+      renderPagination('inventory-pagination', data, 'loadInventory');
     }
 
     async function deleteInventory(id) {
@@ -913,61 +1775,137 @@
 
     async function saveInventory(id) {
       const quantity = parseInt(document.getElementById('edit-qty').value);
-      const price = parseFloat(document.getElementById('edit-price').value);
+      const price    = parseFloat(document.getElementById('edit-price').value);
       const data = await api('PUT', '/api/v1/inventory/' + id, { quantity, price });
       if (data) {
         toast('Inventory #' + id + ' updated', 'success');
-        closeDetailPanel();
+        closeDetail();
         loadInventory(inventoryPage);
       }
     }
 
-    // ── ADD INVENTORY ──
     async function createInventory() {
       const productId = parseInt(document.getElementById('ai-productId').value);
-      const quantity = parseInt(document.getElementById('ai-quantity').value);
-      const price = parseFloat(document.getElementById('ai-price').value);
+      const quantity  = parseInt(document.getElementById('ai-quantity').value);
+      const price     = parseFloat(document.getElementById('ai-price').value);
       if (!productId || isNaN(quantity) || isNaN(price)) { toast('All fields required', 'error'); return; }
       const data = await api('POST', '/api/v1/inventory/create', { productId, quantity, price });
       if (data) {
         toast('Inventory added: #' + data.id, 'success');
         document.getElementById('ai-result').innerHTML = `
-          <div style="color:var(--success)">✓ Created successfully</div>
+          <div style="color:var(--success)">✓ Created</div>
           <div class="detail-field" style="margin-top:0.75rem"><div class="df-label">Inventory ID</div><div class="df-val">${data.id}</div></div>
           <div class="detail-field"><div class="df-label">Product ID</div><div class="df-val">${data.productId}</div></div>
           <div class="detail-field"><div class="df-label">Seller ID</div><div class="df-val">${data.sellerId}</div></div>
-          <div class="detail-field"><div class="df-label">Quantity</div><div class="df-val">${data.quantity}</div></div>
+          <div class="detail-field"><div class="df-label">Qty</div><div class="df-val">${data.quantity}</div></div>
           <div class="detail-field"><div class="df-label">Price</div><div class="df-val">₹${data.price?.toFixed(2)}</div></div>`;
         document.getElementById('ai-productId').value = '';
-        document.getElementById('ai-quantity').value = '';
-        document.getElementById('ai-price').value = '';
+        document.getElementById('ai-quantity').value  = '';
+        document.getElementById('ai-price').value     = '';
       }
     }
 
-    // ── DETAIL PANEL ──
-    function openDetail(html) {
-      document.getElementById('detailContent').innerHTML = html;
-      document.getElementById('detailOverlay').classList.add('open');
-    }
-    function closeDetailPanel() {
-      document.getElementById('detailOverlay').classList.remove('open');
-    }
-    function closeDetail(e) {
-      if (e.target === document.getElementById('detailOverlay')) closeDetailPanel();
-    }
-
     function prefillInventory(productId) {
-      closeDetailPanel();
-      show('inventory-add');
+      closeDetail();
+      switchSection('admin');
+      showPanel('admin-inventory-add');
       document.getElementById('ai-productId').value = productId;
     }
 
+    // ══════════════════════════════════════════════════
+    //  ADMIN — ALL ORDERS
+    // ══════════════════════════════════════════════════
+    async function loadAllOrders(page = 0) {
+      adminOrdersPage = page;
+      const id         = document.getElementById('ao-id').value;
+      const customerId = document.getElementById('ao-customerId').value;
+      const status     = document.getElementById('ao-status').value;
+      const city       = document.getElementById('ao-city').value;
+      const partner    = document.getElementById('ao-partner').value;
+      let qs = `?page=${page}&size=20&sortOrder=desc`;
+      if (id)         qs += '&id=' + id;
+      if (customerId) qs += '&customerId=' + customerId;
+      if (status)     qs += '&status=' + status;
+      if (city)       qs += '&city=' + encodeURIComponent(city);
+      if (partner)    qs += '&deliveryPartner=' + encodeURIComponent(partner);
+      document.getElementById('admin-orders-table-wrap').innerHTML = '<div class="loading">Loading...</div>';
+      const data = await api('GET', '/api/v1/orders' + qs, undefined, ORDER_BASE);
+      if (!data) return;
+      const items = data.data || [];
+      if (!items.length) {
+        document.getElementById('admin-orders-table-wrap').innerHTML = '<div class="empty">No orders found</div>';
+        document.getElementById('admin-orders-pagination').innerHTML = '';
+        return;
+      }
+      document.getElementById('admin-orders-table-wrap').innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th><th>City</th><th>Partner</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${items.map(o => `
+                <tr>
+                  <td><span class="id-chip">${o.id}</span></td>
+                  <td><span class="id-chip">${o.customerId}</span></td>
+                  <td style="color:var(--accent)">₹${o.totalAmount?.toFixed(2) ?? '—'}</td>
+                  <td><span class="order-status-${o.status}">${o.status}</span></td>
+                  <td>${o.city || '—'}</td>
+                  <td>${o.deliveryPartner || '—'}</td>
+                  <td>
+                    <button class="btn btn-secondary btn-sm" onclick="showOrderDetail(${o.id})">Detail</button>
+                    <button class="btn btn-cyan btn-sm" onclick="openUpdateStatus(${o.id}, '${o.status}')">Status</button>
+                    <button class="btn btn-danger btn-sm" onclick="adminDeleteOrder(${o.id})">Del</button>
+                  </td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+      renderPagination('admin-orders-pagination', data, 'loadAllOrders');
+    }
+
+    function openUpdateStatus(id, currentStatus) {
+      openDetail(`
+        <div style="font-weight:800;font-size:1.05rem;margin-bottom:1rem">Update Order Status</div>
+        <div class="detail-field"><div class="df-label">Order ID</div><div class="df-val">${id}</div></div>
+        <div class="detail-field"><div class="df-label">Current Status</div><div class="df-val order-status-${currentStatus}">${currentStatus}</div></div>
+        <hr class="divider">
+        <div class="form-group" style="margin-bottom:1rem"><label>New Status</label>
+          <select id="new-status" style="background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:0.8rem;padding:0.5rem 0.7rem;border-radius:4px;outline:none;width:100%">
+            <option>PENDING</option><option>CONFIRMED</option><option>SHIPPED</option>
+            <option>OUT_FOR_DELIVERY</option><option>DELIVERED</option><option>FAILED</option><option>CANCELLED</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="updateOrderStatus(${id})">Update Status</button>
+      `);
+      document.getElementById('new-status').value = currentStatus;
+    }
+
+    async function updateOrderStatus(id) {
+      const status = document.getElementById('new-status').value;
+      const res = await api('PATCH', `/api/v1/orders/${id}/status?status=${status}`, undefined, ORDER_BASE);
+      if (res) {
+        toast('Order #' + id + ' → ' + status, 'success');
+        closeDetail();
+        loadAllOrders(adminOrdersPage);
+      }
+    }
+
+    async function adminDeleteOrder(id) {
+      if (!confirm('Delete order #' + id + '? This cannot be undone.')) return;
+      const res = await api('DELETE', '/api/v1/orders/' + id, undefined, ORDER_BASE);
+      if (res !== null) { toast('Order deleted', 'success'); loadAllOrders(adminOrdersPage); }
+    }
+
+    // ══════════════════════════════════════════════════
+    //  UTILS
+    // ══════════════════════════════════════════════════
     function escHtml(str) {
       return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     }
 
-    // ── INIT ──
-    show('products-list');
+    // ══════════════════════════════════════════════════
+    //  INIT
+    // ══════════════════════════════════════════════════
+    switchSection('store');
 </script>
 </body>
 </html>

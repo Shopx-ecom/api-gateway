@@ -14,6 +14,7 @@ public class SwaggerConfig {
             params.addGroup("order-service", "/order-service/v3/api-docs");
             params.addGroup("user-service", "/user-service/v3/api-docs");
             params.addGroup("product-service", "/product-service/v3/api-docs");
+            params.addGroup("payment-service", "/payment-service/v3/api-docs");
         };
     }
 }

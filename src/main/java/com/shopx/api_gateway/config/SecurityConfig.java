@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 "/users/v3/api-docs",
                                 "/products/v3/api-docs",
                                 "/orders/v3/api-docs",
+                                "/payment/v3/api-docs",
                                 "/api/v1/auth/**"
                         ).permitAll()
                         .anyExchange().authenticated()
